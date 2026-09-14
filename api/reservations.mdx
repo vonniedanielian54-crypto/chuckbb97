@@ -1,0 +1,200 @@
+---
+title: "REST API Endpoints for Reservations"
+sidebarTitle: "Reservations"
+description: "Create, retrieve, modify, and cancel venue reservations with the KD LLC Reservations API. Manage the full booking lifecycle programmatically."
+---
+
+The Reservations API is the core of the KD LLC booking experience. It lets you create new reservations on behalf of guests, retrieve booking details, make modifications to existing bookings, and handle cancellations — all through a clean, predictable REST interface. Before creating a reservation, use the [Venues availability endpoint](/api/venues#check-venue-availability) to confirm that your desired slot is open.
+
+---
+
+## Create a Reservation
+
+<ParamField body="venue_id" type="string" required>
+  The unique ID of the venue to book (e.g., `"ven_01HQ8F3KZMB5A9TRCX6D"`). Must be a valid, active venue.
+</ParamField>
+
+<ParamField body="date" type="string" required>
+  Reservation date in `YYYY-MM-DD` format (e.g., `"2025-02-14"`).
+</ParamField>
+
+<ParamField body="time" type="string" required>
+  Reservation time in `HH:MM` 24-hour format (e.g., `"19:00"`). Must correspond to an available slot returned by the availability endpoint.
+</ParamField>
+
+<ParamField body="party_size" type="integer" required>
+  Number of guests attending. Must be a positive integer within the venue's capacity.
+</ParamField>
+
+<ParamField body="guest_name" type="string" required>
+  Full name of the primary guest making the reservation.
+</ParamField>
+
+<ParamField body="guest_email" type="string" required>
+  Email address for the primary guest. Confirmation emails and reminders are sent to this address.
+</ParamField>
+
+<ParamField body="guest_phone" type="string">
+  Phone number for the primary guest, including country code (e.g., `"+13055550182"`). Used for SMS reminders if enabled.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Optional free-text notes for the venue, such as special occasion details, accessibility requirements, or seating preferences.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/reservations \
+  -X POST \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+    "date": "2025-02-14",
+    "time": "19:00",
+    "party_size": 4,
+    "guest_name": "Jordan Rivera",
+    "guest_email": "jordan.rivera@example.com",
+    "guest_phone": "+13055550182",
+    "notes": "Anniversary dinner — please arrange a window table if possible."
+  }'
+```
+
+```json
+{
+  "id": "res_01HR2PKZMB5A9TRCX8F",
+  "status": "confirmed",
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "venue_name": "Azul Rooftop",
+  "date": "2025-02-14",
+  "time": "19:00",
+  "party_size": 4,
+  "guest_name": "Jordan Rivera",
+  "guest_email": "jordan.rivera@example.com",
+  "guest_phone": "+13055550182",
+  "notes": "Anniversary dinner — please arrange a window table if possible.",
+  "confirmation_code": "KDLLC-78341",
+  "created_at": "2025-01-10T15:22:00Z",
+  "updated_at": "2025-01-10T15:22:00Z"
+}
+```
+
+<ResponseField name="id" type="string">
+  Unique identifier for the reservation. Store this to retrieve or modify the booking later.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current status of the reservation. Possible values: `confirmed`, `pending`, `modified`, `cancelled`.
+</ResponseField>
+
+<ResponseField name="confirmation_code" type="string">
+  Human-readable confirmation code (e.g., `KDLLC-78341`). Share this with the guest as their booking reference.
+</ResponseField>
+
+---
+
+## Get a Reservation
+
+Retrieve full details of an existing reservation by its ID.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the reservation (e.g., `res_01HR2PKZMB5A9TRCX8F`).
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/reservations/res_01HR2PKZMB5A9TRCX8F \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "id": "res_01HR2PKZMB5A9TRCX8F",
+  "status": "confirmed",
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "venue_name": "Azul Rooftop",
+  "date": "2025-02-14",
+  "time": "19:00",
+  "party_size": 4,
+  "guest_name": "Jordan Rivera",
+  "guest_email": "jordan.rivera@example.com",
+  "guest_phone": "+13055550182",
+  "notes": "Anniversary dinner — please arrange a window table if possible.",
+  "confirmation_code": "KDLLC-78341",
+  "created_at": "2025-01-10T15:22:00Z",
+  "updated_at": "2025-01-10T15:22:00Z"
+}
+```
+
+---
+
+## Modify a Reservation
+
+Update the date, time, party size, or notes on an existing reservation. Only the fields you include in the request body will be changed — all other fields remain as-is. You cannot change the `venue_id` on an existing reservation; cancel and create a new one instead.
+
+<ParamField body="date" type="string">
+  New reservation date in `YYYY-MM-DD` format.
+</ParamField>
+
+<ParamField body="time" type="string">
+  New reservation time in `HH:MM` 24-hour format. The updated slot must be available.
+</ParamField>
+
+<ParamField body="party_size" type="integer">
+  Updated party size. Must remain within the venue's capacity.
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Replacement notes for the venue. Passing an empty string will clear existing notes.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/reservations/res_01HR2PKZMB5A9TRCX8F \
+  -X PUT \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-02-15",
+    "time": "20:00",
+    "party_size": 6
+  }'
+```
+
+```json
+{
+  "id": "res_01HR2PKZMB5A9TRCX8F",
+  "status": "modified",
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "venue_name": "Azul Rooftop",
+  "date": "2025-02-15",
+  "time": "20:00",
+  "party_size": 6,
+  "guest_name": "Jordan Rivera",
+  "guest_email": "jordan.rivera@example.com",
+  "guest_phone": "+13055550182",
+  "notes": "Anniversary dinner — please arrange a window table if possible.",
+  "confirmation_code": "KDLLC-78341",
+  "created_at": "2025-01-10T15:22:00Z",
+  "updated_at": "2025-01-11T09:05:00Z"
+}
+```
+
+---
+
+## Cancel a Reservation
+
+Cancels an existing reservation. On success the API returns `204 No Content` with no response body.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the reservation to cancel.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/reservations/res_01HR2PKZMB5A9TRCX8F \
+  -X DELETE \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+A `204 No Content` response confirms the cancellation. No response body is returned. You can verify the cancellation by subsequently calling `GET /reservations/{id}`, which will return the reservation with `"status": "cancelled"`.
+
+<Warning>
+**Cancellation windows vary by venue.** Many venues enforce a minimum notice period — typically 2–24 hours before the reservation time — after which cancellations may be subject to a fee or be rejected outright with a `422 Unprocessable Entity` response. Check the venue's `cancellation_policy` field (returned by `GET /venues/{id}`) before initiating a cancellation, and surface this policy clearly to your guests at the time of booking.
+</Warning>

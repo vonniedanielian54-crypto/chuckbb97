@@ -1,0 +1,113 @@
+---
+title: "Reservations: Booking Tables & Spaces on KD LLC"
+sidebarTitle: "Reservations"
+description: "Understand how reservations work in KD LLC — lifecycle states, object properties, cancellation policies, and handling special guest requests."
+---
+
+Reservations are how guests secure their spot at a venue on KD LLC. When a guest books a table at a restaurant, claims a section at a lounge, or reserves a private dining room, a reservation is created and tied to both the venue and the guest's contact information. Understanding the reservation model — from creation through completion — helps you build reliable booking experiences and handle every edge case confidently.
+
+## What Is a Reservation?
+
+A reservation is a confirmed booking at a venue for a specific date, time, and party size. It links a guest's identity and contact details to a venue's available inventory for a particular moment in time. Once created, a reservation moves through a defined lifecycle that reflects its real-world status — from the moment a guest books to the moment they leave the venue.
+
+## Reservation Lifecycle
+
+Every reservation follows a predictable sequence of states. Track the `status` field to understand where a reservation stands at any point.
+
+```
+pending → confirmed → seated → completed
+                    ↘ cancelled
+```
+
+| Status | Description |
+|---|---|
+| `pending` | Reservation has been submitted but not yet confirmed by the venue |
+| `confirmed` | Venue has accepted the booking; the guest has a guaranteed spot |
+| `seated` | Guest has arrived and been seated at the venue |
+| `completed` | Visit is over; reservation is closed |
+| `cancelled` | Reservation was cancelled by the guest or the venue |
+
+<Note>
+  Most reservations move from `pending` to `confirmed` automatically within seconds. Some venues require manual review, which may introduce a short delay.
+</Note>
+
+## Reservation Properties
+
+Each reservation object carries the following fields:
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | string | Unique identifier for the reservation |
+| `venue_id` | string | ID of the venue being reserved |
+| `date` | string | Reservation date in `YYYY-MM-DD` format |
+| `time` | string | Reservation time in `HH:MM` (24-hour) format |
+| `party_size` | integer | Number of guests in the party |
+| `guest_name` | string | Full name of the primary guest |
+| `guest_email` | string | Email address for confirmation and updates |
+| `guest_phone` | string | Phone number for venue contact |
+| `status` | string | Current lifecycle state of the reservation |
+| `notes` | string | Special requests or notes from the guest |
+| `created_at` | string | ISO 8601 timestamp of when the reservation was created |
+
+### Example Reservation Object
+
+```json
+{
+  "id": "res_xyz789",
+  "venue_id": "venue_abc123",
+  "date": "2025-02-14",
+  "time": "19:30",
+  "party_size": 4,
+  "guest_name": "Jordan Ellis",
+  "guest_email": "jordan.ellis@example.com",
+  "guest_phone": "+12125550192",
+  "status": "confirmed",
+  "notes": "Celebrating an anniversary — please prepare a dessert surprise.",
+  "created_at": "2025-01-20T14:22:10Z"
+}
+```
+
+## Reservation Policies
+
+Venues on KD LLC set their own policies for cancellations, modifications, and no-shows. Always surface these policies to guests before they complete a booking.
+
+### Cancellation Window
+
+Each venue defines a cancellation deadline — the latest point at which a guest can cancel without penalty. Cancellations made after this window may result in a fee charged to the guest's payment method on file.
+
+- Retrieve a venue's cancellation policy from the `policies.cancellation` field on the venue object.
+- Display the deadline prominently in your booking confirmation UI.
+
+<Warning>
+  Cancellations submitted after the venue's deadline are non-refundable. Always confirm the cancellation window with the guest before processing.
+</Warning>
+
+### Modification Rules
+
+Guests can modify a confirmed reservation — such as adjusting the party size or shifting the time — up to the venue's modification cutoff. Modifications are subject to availability at the new time or size.
+
+- Use the reservation update endpoint to submit changes.
+- The reservation remains in `confirmed` status if the modification succeeds; otherwise, the original details are preserved and an error is returned.
+
+### No-Show Handling
+
+If a guest does not arrive within the venue's no-show window (typically 15–30 minutes after the reservation time), the venue may mark the reservation as a no-show. No-show policies vary by venue and may include a fee.
+
+<Tip>
+  Send guests an automated reminder 24 hours before their reservation to reduce no-show rates. Include a one-click cancellation link to keep your cancellation rate accurate.
+</Tip>
+
+## Special Requests and Notes
+
+The `notes` field lets guests communicate preferences, dietary restrictions, accessibility needs, or celebration details directly to the venue. This is a free-text field with a 500-character limit.
+
+Common use cases for notes include:
+
+- Dietary restrictions (e.g., `"Guest has a severe nut allergy"`)
+- Celebration requests (e.g., `"Birthday — please have candles on the dessert"`)
+- Seating preferences (e.g., `"Prefer a booth or window table"`)
+- Accessibility needs (e.g., `"Wheelchair-accessible seating required"`)
+
+<Note>
+  Notes are passed directly to venue staff and are not guaranteed to be fulfilled. Encourage guests to contact the venue directly for critical requirements.
+</Note>

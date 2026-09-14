@@ -1,0 +1,136 @@
+---
+title: "KD LLC Frequently Asked Questions"
+sidebarTitle: "FAQ"
+description: "Find quick answers to the most common questions about reservations, venue management, payments, team access, and the KD LLC API."
+---
+
+This page collects the questions our support team hears most often. If you cannot find what you are looking for here, visit the [Troubleshooting guide](/support/troubleshooting) for step-by-step resolutions to common errors, or reach out to the team at [support@kdllc.com](mailto:support@kdllc.com).
+
+<AccordionGroup>
+
+<Accordion title="How do I reset my password?">
+To reset your password, click **Forgot password?** on the KD LLC login page and enter the email address associated with your account. You will receive a reset link within a few minutes. Click the link, enter a new password, and log in.
+
+If the email does not arrive within 5 minutes, check your spam or junk folder. If you still cannot locate it, contact [support@kdllc.com](mailto:support@kdllc.com) with your account email address and a member of the team will assist you.
+
+<Note>
+Password reset links expire after 30 minutes. If your link has expired, return to the login page and request a new one.
+</Note>
+</Accordion>
+
+<Accordion title="Can I modify a reservation after confirming?">
+Yes. You can modify a confirmed reservation up until the venue's modification cutoff time, which varies by venue. To make changes:
+
+1. Open the **My Reservations** section of your dashboard.
+2. Select the reservation you want to update.
+3. Click **Modify Reservation**.
+4. Adjust the date, time, or party size and click **Save Changes**.
+
+The venue receives a notification about the modification and will confirm or decline the updated request. If the modification window has passed, contact the venue directly through the messaging feature or call them using the contact details on their profile page.
+</Accordion>
+
+<Accordion title="What is the cancellation policy?">
+Cancellation policies are set individually by each venue and are displayed on the venue's profile page and in your reservation confirmation email. Most venues allow free cancellation up to 24 hours before the reservation time.
+
+To cancel a reservation:
+
+1. Go to **My Reservations**.
+2. Select the reservation you want to cancel.
+3. Click **Cancel Reservation** and confirm.
+
+If you cancel within the venue's no-cancellation window, a late-cancellation fee may apply. Check the venue's policy before cancelling. If you believe a fee has been applied incorrectly, contact the venue or reach out to [support@kdllc.com](mailto:support@kdllc.com).
+</Accordion>
+
+<Accordion title="How do I add my venue to KD LLC?">
+To list your venue on KD LLC:
+
+1. Log in to your account and navigate to **Dashboard → Add Venue**.
+2. Complete the venue profile form: name, address, category (dining, nightlife, events), photos, description, and operating hours.
+3. Configure your booking settings — capacity, lead time, cancellation policy, and whether reservations are auto-confirmed.
+4. Submit the listing for review.
+
+The KD LLC team reviews new venue submissions within 2 business days. You will receive an email notification once your venue is approved and publicly visible in search results.
+
+<Tip>
+Venues with complete profiles — including high-quality photos and an accurate description — receive significantly more discovery traffic than listings with incomplete information.
+</Tip>
+</Accordion>
+
+<Accordion title="What payment methods are accepted for event tickets?">
+KD LLC accepts the following payment methods for event ticket purchases:
+
+- **Credit and debit cards** — Visa, Mastercard, American Express, Discover
+- **Apple Pay and Google Pay** — available in supported browsers and the KD LLC mobile app
+- **KD LLC Credits** — previously issued refunds or promotional credits applied at checkout
+
+At this time, KD LLC does not accept PayPal, cryptocurrency, or bank transfers for ticket purchases. Gift cards and venue-specific vouchers may be accepted where individually supported by the hosting venue.
+</Accordion>
+
+<Accordion title="How do I invite team members to my account?">
+Operators on the **Pro** and **Enterprise** plans can invite team members to manage reservations and venue settings under a shared account:
+
+1. Navigate to **Settings → Team**.
+2. Click **Invite Member**.
+3. Enter the team member's email address and select their role:
+   - **Manager** — full access to reservations, settings, and reports
+   - **Staff** — can view and check in reservations, but cannot change settings
+4. Click **Send Invite**.
+
+The invited team member receives an email with a link to accept the invitation and create their login credentials. You can revoke access at any time from **Settings → Team** by clicking **Remove** next to their name.
+</Accordion>
+
+<Accordion title="Is there a mobile app?">
+Yes. The KD LLC mobile app is available for **iOS** (iPhone and iPad) and **Android** devices. Download it from the App Store or Google Play by searching for **KD LLC**.
+
+The app supports:
+- Browsing and booking venues and events
+- Managing existing reservations
+- Receiving push notifications for reminders and updates
+- Operator tools: viewing the reservation queue, checking in guests, and managing your venue profile
+
+Log in with the same credentials you use on the web dashboard — your data is synchronized in real time across all devices.
+</Accordion>
+
+<Accordion title="How do I get an API key?">
+API keys are available to all registered KD LLC accounts. To generate one:
+
+1. Log in and navigate to **Settings → API Keys**.
+2. Click **New API Key**.
+3. Give the key a descriptive label so you can identify it later (for example, `my-integration` or `zapier`).
+4. Select the permission scopes your integration requires.
+5. Click **Create Key** and copy the key immediately — it is shown only once.
+
+Include your key in requests using the `Authorization` header:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+For full API documentation, visit the [API Reference](/api/overview) section.
+</Accordion>
+
+<Accordion title="What rate limits apply to the API?">
+KD LLC enforces rate limits to ensure fair usage across all integrations. The default limits are:
+
+| Plan | Requests per Minute | Requests per Day |
+|---|---|---|
+| **Free** | 60 | 1,000 |
+| **Pro** | 300 | 10,000 |
+| **Enterprise** | Custom | Custom |
+
+When you exceed the rate limit, the API returns a `429 Too Many Requests` response. The response includes a `Retry-After` header indicating how many seconds to wait before retrying.
+
+Implement exponential backoff in your integration to handle rate limit responses gracefully. If you consistently need higher limits, contact [support@kdllc.com](mailto:support@kdllc.com) to discuss an Enterprise plan.
+</Accordion>
+
+<Accordion title="How do I contact support?">
+You can reach the KD LLC support team through the following channels:
+
+- **Email:** [support@kdllc.com](mailto:support@kdllc.com) — responses within 1 business day
+- **Live Chat:** Available in the dashboard (click the chat icon in the bottom-right corner) during business hours (Monday–Friday, 9 AM–6 PM ET)
+- **Help Center:** Browse articles and guides at the top of the documentation site
+
+For urgent issues affecting active events or live reservations, use live chat for the fastest response. When contacting support by email, include your account email address and, where applicable, the reservation ID or API key label associated with the issue.
+</Accordion>
+
+</AccordionGroup>

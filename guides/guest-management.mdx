@@ -1,0 +1,240 @@
+---
+title: "Manage Your Guest List and Profiles"
+sidebarTitle: "Guest Management"
+description: "Create and maintain rich guest profiles with preferences, VIP status, and reservation history to deliver a personalized hospitality experience."
+---
+
+KD LLC stores detailed profiles for every guest you serve, giving you a single source of truth for dietary needs, seating preferences, VIP status, and visit history. By keeping profiles accurate and up to date, you can deliver consistently personalized experiences — from a preferred window table to a remembered birthday celebration — every time a guest walks through your door.
+
+---
+
+## Creating a Guest Profile
+
+Add a new guest to your KD LLC account by sending a `POST` request to `/guests`. You can capture contact details, dietary restrictions, and general preferences at the time of creation.
+
+```bash
+curl -X POST "https://api.kdllc.com/v1/guests" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Doe",
+    "email": "jane.doe@example.com",
+    "phone": "+1 (212) 555-0199",
+    "dietary_restrictions": ["gluten-free", "no shellfish"],
+    "preferences": {
+      "seating": "window booth",
+      "music": "jazz",
+      "special_occasions": ["birthday", "anniversary"]
+    }
+  }'
+```
+
+**Example response:**
+
+```json
+{
+  "id": "guest_8d4c2f1a",
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "phone": "+1 (212) 555-0199",
+  "dietary_restrictions": ["gluten-free", "no shellfish"],
+  "vip_status": false,
+  "visit_count": 0,
+  "preferences": {
+    "seating": "window booth",
+    "music": "jazz",
+    "special_occasions": ["birthday", "anniversary"]
+  },
+  "reservation_history": [],
+  "created_at": "2024-01-30T09:11:42Z"
+}
+```
+
+---
+
+## Full Guest Object Reference
+
+A complete guest record includes all profile fields, computed metrics, and a linked reservation history. Here is a representative example of a returning guest:
+
+```json
+{
+  "id": "guest_8d4c2f1a",
+  "name": "Jane Doe",
+  "email": "jane.doe@example.com",
+  "phone": "+1 (212) 555-0199",
+  "dietary_restrictions": ["gluten-free", "no shellfish"],
+  "vip_status": true,
+  "visit_count": 14,
+  "preferences": {
+    "seating": "window booth",
+    "music": "jazz",
+    "special_occasions": ["birthday", "anniversary"]
+  },
+  "reservation_history": [
+    {
+      "reservation_id": "res_7c2e9d41",
+      "venue_name": "The Golden Plate",
+      "date": "2024-02-14",
+      "time": "20:00",
+      "party_size": 4,
+      "status": "completed"
+    },
+    {
+      "reservation_id": "res_2b5f8a03",
+      "venue_name": "The Golden Plate",
+      "date": "2023-12-31",
+      "time": "21:00",
+      "party_size": 2,
+      "status": "completed"
+    }
+  ],
+  "created_at": "2022-06-15T14:30:00Z",
+  "updated_at": "2024-02-15T08:22:11Z"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string | Unique guest identifier |
+| `name` | string | Full name |
+| `email` | string | Primary contact email |
+| `phone` | string | Contact phone number |
+| `dietary_restrictions` | array | List of dietary needs or allergies |
+| `vip_status` | boolean | Whether the guest is flagged as VIP |
+| `visit_count` | integer | Total number of completed visits across all venues |
+| `preferences` | object | Seating, ambiance, and occasion preferences |
+| `reservation_history` | array | Paginated list of past and upcoming reservations |
+
+---
+
+## Looking Up a Guest
+
+Search for a guest by email address using the `email` query parameter. This is the fastest way to pull up a profile at check-in or when taking a new reservation.
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests?email=jane.doe@example.com" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Example response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "guest_8d4c2f1a",
+      "name": "Jane Doe",
+      "email": "jane.doe@example.com",
+      "vip_status": true,
+      "visit_count": 14
+    }
+  ],
+  "total": 1
+}
+```
+
+You can also search by `name` or `phone` using the same pattern: `GET /guests?phone=+12125550199`.
+
+---
+
+## VIP Guests
+
+Mark a guest as VIP to flag them for elevated service and unlock special handling during the reservation flow. Set `vip_status` to `true` with a `PATCH` request:
+
+```bash
+curl -X PATCH "https://api.kdllc.com/v1/guests/guest_8d4c2f1a" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vip_status": true
+  }'
+```
+
+When `vip_status` is `true`, KD LLC surfaces the following behaviours automatically:
+
+- A **VIP badge** appears next to the guest's name in the reservation management dashboard.
+- Front-of-house staff receive a **VIP alert** in the check-in interface when the guest's reservation is upcoming.
+- VIP guests are eligible for **priority waitlist placement** when their preferred time slot is fully booked.
+
+<Note>
+  VIP status is account-wide — it applies across all venues in your KD LLC account, not just the venue where the guest was first created.
+</Note>
+
+---
+
+## Guest Preferences
+
+Keep preferences accurate so every team member can deliver a consistent, personalised experience without asking the guest to repeat themselves. Update any preference field at any time with `PATCH /guests/{id}`:
+
+```bash
+curl -X PATCH "https://api.kdllc.com/v1/guests/guest_8d4c2f1a" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dietary_restrictions": ["gluten-free", "no shellfish", "dairy-free"],
+    "preferences": {
+      "seating": "corner booth",
+      "music": "jazz",
+      "special_occasions": ["birthday", "anniversary"],
+      "notes": "Prefers sparkling water over still. Favourite cocktail: Aperol Spritz."
+    }
+  }'
+```
+
+### Key Preference Categories
+
+- **Dietary restrictions** — Allergies and intolerances automatically surface as alerts on the reservation detail view in your dashboard.
+- **Seating preferences** — Window, booth, bar, outdoor terrace, and more. Staff can see the preference when assigning tables.
+- **Special occasions** — Recording upcoming birthdays or anniversaries lets you proactively offer celebration packages at the time of booking.
+
+---
+
+## Viewing Reservation History
+
+Retrieve a guest's full reservation history with a `GET` request to `/guests/{id}/reservations`. Results are sorted by date descending.
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests/guest_8d4c2f1a/reservations" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Example response:**
+
+```json
+{
+  "guest_id": "guest_8d4c2f1a",
+  "total": 14,
+  "data": [
+    {
+      "reservation_id": "res_7c2e9d41",
+      "venue_id": "venue_4f8a2c1e",
+      "venue_name": "The Golden Plate",
+      "date": "2024-02-14",
+      "time": "20:00",
+      "party_size": 4,
+      "status": "completed",
+      "notes": "Anniversary dinner."
+    },
+    {
+      "reservation_id": "res_2b5f8a03",
+      "venue_id": "venue_4f8a2c1e",
+      "venue_name": "The Golden Plate",
+      "date": "2023-12-31",
+      "time": "21:00",
+      "party_size": 2,
+      "status": "completed",
+      "notes": "New Year's Eve — champagne toast requested."
+    }
+  ],
+  "page": 1,
+  "per_page": 20
+}
+```
+
+Use the `status` query parameter to filter by reservation state: `GET /guests/{id}/reservations?status=upcoming` or `?status=completed`.
+
+---
+
+<Tip>
+  Use guest profiles to proactively personalise every interaction. Before a guest arrives, brief your floor team on their dietary restrictions, preferred seating, and any upcoming special occasion. Guests who feel remembered return more often — and bring more people with them.
+</Tip>

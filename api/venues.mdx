@@ -1,0 +1,207 @@
+---
+title: "REST API Endpoints for Venues"
+sidebarTitle: "Venues"
+description: "Browse, filter, and retrieve venue details using the KD LLC Venues API. Check real-time slot availability for any date and party size."
+---
+
+The Venues API gives you access to KD LLC's full catalog of dining, nightlife, and event venues. You can filter venues by city, type, cuisine, and capacity to surface the most relevant options for your users, then check real-time availability to confirm open reservation slots before presenting them for booking.
+
+---
+
+## List Venues
+
+<ParamField query="city" type="string">
+  Filter venues by city name (e.g., `"New York"`, `"Miami"`). Case-insensitive.
+</ParamField>
+
+<ParamField query="type" type="string">
+  Filter by venue type. Accepted values: `restaurant`, `bar`, `lounge`, `club`, `event-space`.
+</ParamField>
+
+<ParamField query="cuisine" type="string">
+  Filter restaurants and lounges by cuisine style (e.g., `"Italian"`, `"Japanese"`). Only applicable to food-service venue types.
+</ParamField>
+
+<ParamField query="capacity_min" type="integer">
+  Return only venues with a maximum guest capacity at or above this value.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer">
+  Number of venues per page. Defaults to `20`. Maximum is `100`.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/venues?city=Miami&type=restaurant&per_page=5" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "ven_01HQ8F3KZMB5A9TRCX6D",
+      "name": "Azul Rooftop",
+      "type": "restaurant",
+      "cuisine": "Mediterranean",
+      "city": "Miami",
+      "address": "1200 Brickell Ave, Miami, FL 33131",
+      "capacity": 120,
+      "rating": 4.8,
+      "images": [
+        "https://cdn.kdllc.com/venues/azul-rooftop-1.jpg"
+      ],
+      "created_at": "2023-06-15T10:00:00Z"
+    },
+    {
+      "id": "ven_01HQ8F3KZMB5A9TRCX7E",
+      "name": "Ceviche House",
+      "type": "restaurant",
+      "cuisine": "Peruvian",
+      "city": "Miami",
+      "address": "850 Ocean Dr, Miami Beach, FL 33139",
+      "capacity": 80,
+      "rating": 4.6,
+      "images": [
+        "https://cdn.kdllc.com/venues/ceviche-house-1.jpg"
+      ],
+      "created_at": "2023-09-01T14:30:00Z"
+    }
+  ],
+  "meta": {
+    "total": 34,
+    "page": 1,
+    "per_page": 5
+  }
+}
+```
+
+---
+
+## Get a Venue
+
+Retrieve the full profile of a single venue by its unique ID.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the venue (e.g., `ven_01HQ8F3KZMB5A9TRCX6D`).
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/venues/ven_01HQ8F3KZMB5A9TRCX6D \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "name": "Azul Rooftop",
+  "type": "restaurant",
+  "cuisine": "Mediterranean",
+  "city": "Miami",
+  "address": "1200 Brickell Ave, Miami, FL 33131",
+  "capacity": 120,
+  "phone": "+1-305-555-0182",
+  "email": "reservations@azulrooftop.com",
+  "website": "https://azulrooftop.com",
+  "rating": 4.8,
+  "price_tier": 3,
+  "hours": {
+    "monday": "17:00–23:00",
+    "tuesday": "17:00–23:00",
+    "wednesday": "17:00–23:00",
+    "thursday": "17:00–00:00",
+    "friday": "17:00–01:00",
+    "saturday": "12:00–01:00",
+    "sunday": "12:00–22:00"
+  },
+  "features": ["outdoor_seating", "private_dining", "full_bar", "valet_parking"],
+  "images": [
+    "https://cdn.kdllc.com/venues/azul-rooftop-1.jpg",
+    "https://cdn.kdllc.com/venues/azul-rooftop-2.jpg"
+  ],
+  "created_at": "2023-06-15T10:00:00Z",
+  "updated_at": "2024-11-20T08:45:00Z"
+}
+```
+
+<ResponseField name="id" type="string">
+  Unique identifier for the venue. Use this ID when creating reservations or checking availability.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  The category of venue: `restaurant`, `bar`, `lounge`, `club`, or `event-space`.
+</ResponseField>
+
+<ResponseField name="capacity" type="integer">
+  Maximum number of guests the venue can accommodate.
+</ResponseField>
+
+<ResponseField name="price_tier" type="integer">
+  Relative cost indicator on a scale of `1` (budget) to `4` (fine dining / premium).
+</ResponseField>
+
+<ResponseField name="features" type="array of strings">
+  List of amenity flags for the venue, such as `outdoor_seating`, `private_dining`, `full_bar`, and `valet_parking`.
+</ResponseField>
+
+<ResponseField name="hours" type="object">
+  Operating hours keyed by lowercase day of the week. Values are formatted as `HH:MM–HH:MM`.
+</ResponseField>
+
+---
+
+## Check Venue Availability
+
+Returns available reservation time slots for a specific venue on a given date and party size. Use this endpoint before creating a reservation to ensure the slot exists.
+
+<ParamField query="date" type="string" required>
+  The date to check availability for, in `YYYY-MM-DD` format (e.g., `"2025-02-14"`).
+</ParamField>
+
+<ParamField query="party_size" type="integer" required>
+  The number of guests in the party. Must be a positive integer within the venue's capacity.
+</ParamField>
+
+<ParamField query="time_from" type="string">
+  Earliest time to include in results, in `HH:MM` 24-hour format (e.g., `"18:00"`). Optional — defaults to venue open time.
+</ParamField>
+
+<ParamField query="time_to" type="string">
+  Latest time to include in results, in `HH:MM` 24-hour format (e.g., `"21:00"`). Optional — defaults to venue close time.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/venues/ven_01HQ8F3KZMB5A9TRCX6D/availability?date=2025-02-14&party_size=4&time_from=18:00&time_to=21:00" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "date": "2025-02-14",
+  "party_size": 4,
+  "available_slots": [
+    {
+      "time": "18:00",
+      "tables_remaining": 3
+    },
+    {
+      "time": "18:30",
+      "tables_remaining": 5
+    },
+    {
+      "time": "19:00",
+      "tables_remaining": 2
+    },
+    {
+      "time": "20:30",
+      "tables_remaining": 7
+    }
+  ]
+}
+```
+
+If no slots are available for the requested criteria, `available_slots` will be an empty array. You should prompt users to choose a different date, time range, or party size.

@@ -1,0 +1,140 @@
+---
+title: "Set Up Notifications and Reminders"
+sidebarTitle: "Notifications"
+description: "Configure email, SMS, push, and webhook notifications to keep guests and operators informed at every step of the reservation lifecycle."
+---
+
+KD LLC sends notifications at every meaningful moment in the reservation lifecycle — when a booking is confirmed, when a reminder is due, when a cancellation is processed, and when an event is updated. You control which channels receive which messages and how quickly they arrive. Navigate to **Settings → Notifications** to manage all of these preferences.
+
+## Notification Channels
+
+KD LLC supports four notification channels. You can enable any combination of them independently for different event types.
+
+| Channel | Best For | Setup Required |
+|---|---|---|
+| **Email** | Confirmations, receipts, detailed itineraries | None — active by default |
+| **SMS** | Time-sensitive reminders and cancellations | Phone number verification |
+| **Push (Mobile App)** | Real-time alerts on iOS and Android | KD LLC app installed |
+| **Webhook** | Server-to-server automation and integrations | Public URL configured |
+
+## Email Notifications
+
+Email is enabled for all accounts and requires no additional setup. To customize which events trigger emails, go to **Settings → Notifications → Email**.
+
+### Triggering Events
+
+Toggle email delivery on or off for each of the following events:
+
+- **Reservation Confirmed** — Sent immediately when a reservation is accepted
+- **Reservation Reminder** — Sent before the reservation (timing is configurable; see [Reminder Timing](#reservation-reminder-timing))
+- **Reservation Cancelled** — Sent when a guest or operator cancels a booking
+- **Reservation Modified** — Sent when date, time, or party size changes
+- **Event Published** — Sent to followers when a venue publishes a new event
+- **Event Cancelled** — Sent to ticket holders when an event is called off
+
+### Customizing Email Templates
+
+Operators can customize the content of confirmation and reminder emails to reflect their venue's branding:
+
+1. Navigate to **Settings → Notifications → Email → Templates**.
+2. Select the template you want to edit (for example, **Reservation Confirmed**).
+3. Update the subject line, header image, and body copy using the visual editor.
+4. Click **Preview** to see a rendered sample before saving.
+5. Click **Save Template** to apply the changes to all future emails.
+
+<Tip>
+Include your venue's cancellation policy and a direct link to the reservation management page in your confirmation email template to reduce inbound support requests.
+</Tip>
+
+## SMS Notifications
+
+SMS notifications deliver short, time-sensitive messages directly to a guest's or operator's mobile number.
+
+### Enabling SMS
+
+1. Navigate to **Settings → Notifications → SMS**.
+2. Toggle **Enable SMS Notifications** on.
+3. If you have not yet verified a phone number, you are prompted to enter one and receive a 6-digit verification code.
+4. Enter the code to complete verification.
+
+<Note>
+Standard carrier messaging rates may apply to guests who receive SMS notifications. KD LLC does not charge separately for outbound SMS within supported regions.
+</Note>
+
+### Choosing SMS Events
+
+Once SMS is active, select which events trigger a text message. At minimum, enabling **Reservation Reminder (2-hour)** is recommended for time-sensitive venues.
+
+## Reservation Reminder Timing
+
+KD LLC supports two configurable reminder windows. Both can be enabled simultaneously on any channel.
+
+| Reminder | Default Timing | Channels Supported |
+|---|---|---|
+| **24-Hour Reminder** | 24 hours before reservation time | Email, SMS, Push |
+| **2-Hour Reminder** | 2 hours before reservation time | Email, SMS, Push |
+
+### Configuring Reminder Timing
+
+To adjust when reminders are sent:
+
+1. Go to **Settings → Notifications → Reminders**.
+2. Find the reminder you want to configure (**24-Hour** or **2-Hour**).
+3. Use the **Offset** dropdown to change the lead time (available options: 1 h, 2 h, 4 h, 6 h, 12 h, 24 h, 48 h).
+4. Toggle the channels (Email, SMS, Push) you want to use for each reminder.
+5. Click **Save**.
+
+<Note>
+If a reservation is created less than 24 hours before the reservation time, the 24-hour reminder is skipped automatically and only the 2-hour reminder fires (if applicable).
+</Note>
+
+## Webhook Notifications
+
+Webhooks allow KD LLC to push real-time event data to your own server via HTTP POST requests. This is useful for custom integrations, internal dashboards, or any downstream system that needs to react to reservation changes programmatically.
+
+### Setting Your Webhook URL
+
+1. Navigate to **Settings → Notifications → Webhooks**.
+2. Click **Add Endpoint**.
+3. Enter the publicly accessible HTTPS URL that will receive the payloads.
+4. Select the event types you want to subscribe to (see below).
+5. Click **Save Endpoint**.
+
+### Subscribable Event Types
+
+| Event | Triggered When |
+|---|---|
+| `reservation.confirmed` | A reservation is accepted by the venue |
+| `reservation.cancelled` | A reservation is cancelled by either party |
+| `reservation.modified` | Date, time, or party size on a reservation changes |
+| `event.published` | A venue publishes a new public event |
+| `event.cancelled` | A published event is cancelled |
+
+### Sample Webhook Payload
+
+The following is a sample POST body for a `reservation.confirmed` event:
+
+```json
+{
+  "event": "reservation.confirmed",
+  "timestamp": "2024-02-10T14:30:00Z",
+  "data": {
+    "reservation_id": "res_xyz789",
+    "venue_id": "venue_abc123",
+    "guest_name": "Jane Smith",
+    "date": "2024-02-14",
+    "time": "7:30 PM",
+    "party_size": 4
+  }
+}
+```
+
+All payloads follow this envelope structure: a top-level `event` string, an ISO 8601 `timestamp`, and a `data` object containing event-specific fields.
+
+### Verifying Webhook Signatures
+
+<Note>
+Every webhook request from KD LLC includes an `X-KD-Signature` header containing an HMAC-SHA256 signature of the raw request body, signed with your endpoint's secret key. Always verify this signature before processing the payload to ensure the request genuinely originated from KD LLC and was not tampered with in transit. Your endpoint secret is displayed once when you create the webhook endpoint — store it securely.
+</Note>
+
+To verify the signature, compute `HMAC-SHA256(raw_body, your_secret)` and compare it to the value in `X-KD-Signature`. Reject any request where the values do not match.

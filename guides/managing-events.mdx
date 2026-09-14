@@ -1,0 +1,269 @@
+---
+title: "Plan and Manage Events on KD LLC"
+sidebarTitle: "Manage Events"
+description: "Create, publish, and manage special events at your venues — from ticket configuration to guest lists and real-time RSVP tracking."
+---
+
+KD LLC gives you a complete toolkit for running special events at your venues. Whether you are hosting an intimate wine tasting, a ticketed rooftop concert, or a private corporate dinner, this guide covers every stage of the event lifecycle — from initial creation and ticket configuration through publishing, attendance monitoring, and cancellation.
+
+## Prerequisites
+
+- An active KD LLC account with a verified venue
+- A valid API key with `events:write` scope
+- At least one venue ID (retrieve yours with `GET /venues`)
+
+---
+
+## Steps
+
+<Steps>
+  <Step title="Create an Event">
+    Send a `POST` request to `/events` with your venue details, schedule, capacity, and pricing. The event is created in `draft` status and is not publicly visible until you publish it.
+
+    ```bash
+    curl -X POST "https://api.kdllc.com/v1/events" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "venue_id": "venue_4f8a2c1e",
+        "name": "Valentine'\''s Day Jazz & Dinner",
+        "date": "2024-02-14",
+        "start_time": "19:00",
+        "end_time": "23:00",
+        "capacity": 60,
+        "ticket_price": 95.00,
+        "description": "An intimate evening of live jazz, a curated four-course dinner, and champagne welcome. Dress code: smart casual."
+      }'
+    ```
+
+    **Example response:**
+
+    ```json
+    {
+      "id": "evt_3a7f1b89",
+      "status": "draft",
+      "venue_id": "venue_4f8a2c1e",
+      "name": "Valentine's Day Jazz & Dinner",
+      "date": "2024-02-14",
+      "start_time": "19:00",
+      "end_time": "23:00",
+      "capacity": 60,
+      "tickets_sold": 0,
+      "ticket_price": 95.00,
+      "description": "An intimate evening of live jazz, a curated four-course dinner, and champagne welcome. Dress code: smart casual.",
+      "created_at": "2024-01-28T10:05:33Z"
+    }
+    ```
+
+    Save the returned `id` — you will reference it throughout the remaining steps.
+  </Step>
+
+  <Step title="Configure Ticket Types">
+    Add multiple ticket tiers to your event to offer different pricing and access levels. Send a `POST` request to `/events/{id}/ticket_types` for each tier you want to create.
+
+    **General Admission tier:**
+
+    ```bash
+    curl -X POST "https://api.kdllc.com/v1/events/evt_3a7f1b89/ticket_types" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "General Admission",
+        "price": 95.00,
+        "quantity": 45,
+        "description": "Four-course dinner and live jazz. Shared seating."
+      }'
+    ```
+
+    **VIP tier:**
+
+    ```bash
+    curl -X POST "https://api.kdllc.com/v1/events/evt_3a7f1b89/ticket_types" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "VIP",
+        "price": 175.00,
+        "quantity": 15,
+        "description": "Premium reserved seating, champagne on arrival, meet-and-greet with the performers."
+      }'
+    ```
+
+    **Example response (VIP tier):**
+
+    ```json
+    {
+      "id": "tt_9e2c4d07",
+      "event_id": "evt_3a7f1b89",
+      "name": "VIP",
+      "price": 175.00,
+      "quantity": 15,
+      "sold": 0,
+      "available": 15,
+      "description": "Premium reserved seating, champagne on arrival, meet-and-greet with the performers."
+    }
+    ```
+
+    <Note>
+      The combined `quantity` across all ticket types should not exceed the event's `capacity`. KD LLC enforces this limit and returns a `422` error if you exceed it.
+    </Note>
+  </Step>
+
+  <Step title="Publish the Event">
+    When your event details and ticket types are ready, change the event's status to `published`. This makes the event visible to guests and activates ticket sales.
+
+    ```bash
+    curl -X PATCH "https://api.kdllc.com/v1/events/evt_3a7f1b89" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "status": "published"
+      }'
+    ```
+
+    **Example response:**
+
+    ```json
+    {
+      "id": "evt_3a7f1b89",
+      "status": "published",
+      "published_at": "2024-01-28T11:30:00Z",
+      "name": "Valentine's Day Jazz & Dinner",
+      "date": "2024-02-14"
+    }
+    ```
+
+    Once published, guests can discover and register for your event through the KD LLC platform or your embedded booking widget.
+  </Step>
+
+  <Step title="Monitor RSVPs and Ticket Sales">
+    Track who has registered for your event by querying the attendees list. The response is paginated — use the `page` and `per_page` parameters to navigate large guest lists.
+
+    ```bash
+    curl -X GET "https://api.kdllc.com/v1/events/evt_3a7f1b89/attendees" \
+      -H "Authorization: Bearer YOUR_API_KEY"
+    ```
+
+    **Example response:**
+
+    ```json
+    {
+      "event_id": "evt_3a7f1b89",
+      "total_attendees": 28,
+      "tickets_sold": 28,
+      "capacity": 60,
+      "attendees": [
+        {
+          "id": "att_1a2b3c4d",
+          "guest_name": "Jane Doe",
+          "guest_email": "jane.doe@example.com",
+          "ticket_type": "VIP",
+          "ticket_id": "tkt_88f2c901",
+          "checked_in": false,
+          "registered_at": "2024-01-29T08:14:22Z"
+        },
+        {
+          "id": "att_5e6f7a8b",
+          "guest_name": "Marcus Green",
+          "guest_email": "marcus.green@example.com",
+          "ticket_type": "General Admission",
+          "ticket_id": "tkt_33b7d445",
+          "checked_in": false,
+          "registered_at": "2024-01-29T09:02:55Z"
+        }
+      ],
+      "page": 1,
+      "per_page": 20
+    }
+    ```
+  </Step>
+
+  <Step title="Manage the Guest List">
+    You can manually add or remove attendees without requiring them to go through the ticket purchase flow — useful for complimentary guests or on-the-door additions.
+
+    **Add an attendee manually:**
+
+    ```bash
+    curl -X POST "https://api.kdllc.com/v1/events/evt_3a7f1b89/attendees" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "guest_name": "Sofia Reyes",
+        "guest_email": "sofia.reyes@example.com",
+        "ticket_type": "VIP",
+        "complimentary": true,
+        "notes": "Press guest — media coverage."
+      }'
+    ```
+
+    **Remove an attendee:**
+
+    ```bash
+    curl -X DELETE "https://api.kdllc.com/v1/events/evt_3a7f1b89/attendees/att_1a2b3c4d" \
+      -H "Authorization: Bearer YOUR_API_KEY"
+    ```
+
+    Removing an attendee cancels their ticket and, if the ticket was purchased, triggers the refund flow according to your event's refund policy.
+  </Step>
+</Steps>
+
+---
+
+## Event Updates
+
+To modify event details after publishing (for example, updating the start time or description), send a `PATCH` request with only the fields you want to change:
+
+```bash
+curl -X PATCH "https://api.kdllc.com/v1/events/evt_3a7f1b89" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_time": "19:30",
+    "description": "An intimate evening of live jazz, a curated four-course dinner, and champagne welcome. Doors open at 19:00. Dress code: smart casual."
+  }'
+```
+
+### Notify Registered Guests
+
+After updating event details, send a notification to all registered attendees by calling the notifications endpoint:
+
+```bash
+curl -X POST "https://api.kdllc.com/v1/events/evt_3a7f1b89/notifications" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject": "Event Update: Valentine'\''s Day Jazz & Dinner",
+    "message": "We have updated the start time to 19:30. Doors will open at 19:00. We look forward to seeing you!"
+  }'
+```
+
+This sends an email to every attendee who has a valid `guest_email` on their registration.
+
+---
+
+## Cancelling an Event
+
+If you need to cancel an event entirely, send a `DELETE` request to `/events/{id}`:
+
+```bash
+curl -X DELETE "https://api.kdllc.com/v1/events/evt_3a7f1b89" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Example response:**
+
+```json
+{
+  "id": "evt_3a7f1b89",
+  "status": "cancelled",
+  "cancelled_at": "2024-02-01T16:45:00Z",
+  "attendees_notified": 28,
+  "refunds_initiated": 26
+}
+```
+
+KD LLC automatically initiates refunds for all paid ticket holders and records the number of attendees notified in the response. Complimentary tickets are not refunded.
+
+<Warning>
+  Cancelling an event immediately sends a cancellation email to every registered attendee. This action is irreversible — a cancelled event cannot be reinstated. If you only need to reschedule, use `PATCH /events/{id}` to update the date and start time, then notify guests, rather than cancelling and recreating the event.
+</Warning>

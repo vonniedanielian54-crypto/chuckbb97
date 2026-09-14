@@ -1,0 +1,128 @@
+---
+title: "Events: Ticketed & RSVP Experiences on KD LLC"
+sidebarTitle: "Events"
+description: "Learn how events work in KD LLC — from ticketed dinners and DJ nights to private invite-only experiences, guest lists, and event booking flows."
+---
+
+Events bring special, one-of-a-kind experiences to life on KD LLC. While a standard reservation secures a table, an event is a curated experience — a NYE dinner, a rooftop wine tasting, a themed DJ night — that guests discover, register for, or purchase tickets to. Understanding how events are modeled helps you surface the right experiences to guests and manage everything from ticket inventory to guest lists with confidence.
+
+## What Is an Event?
+
+An event is a special, ticketed or RSVP-based experience hosted at a venue for a fixed date and time. Unlike a standard reservation — which books capacity at a venue for an open dining or lounge session — an event is a distinct, programmed experience with its own name, description, ticket structure, and guest list. Events can be open to the public, invite-only, or ticketed with multiple price tiers.
+
+Examples of events on KD LLC include:
+
+- New Year's Eve multi-course dinners
+- Weekend DJ nights and live music performances
+- Private wine and spirit tastings
+- Exclusive chef's table experiences
+- Corporate buyouts and private celebrations
+
+## Event Properties
+
+Each event object contains the following fields:
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | string | Unique identifier for the event |
+| `venue_id` | string | ID of the hosting venue |
+| `name` | string | Display name of the event |
+| `description` | string | Full description shown to guests |
+| `date` | string | Event date in `YYYY-MM-DD` format |
+| `start_time` | string | Event start time in `HH:MM` (24-hour) format |
+| `end_time` | string | Event end time in `HH:MM` (24-hour) format |
+| `capacity` | integer | Maximum number of attendees |
+| `ticket_price` | number | Base ticket price in USD |
+| `ticket_types` | array | List of available ticket tier objects |
+| `status` | string | Current event status (`draft`, `published`, `sold_out`, `cancelled`, `completed`) |
+
+### Example Event Object
+
+```json
+{
+  "id": "evt_nye2025",
+  "venue_id": "venue_abc123",
+  "name": "New Year's Eve Grand Gala",
+  "description": "Ring in 2026 with a five-course dinner, open bar, and live DJ set at The Grand Lounge. Tables are limited — book early.",
+  "date": "2025-12-31",
+  "start_time": "20:00",
+  "end_time": "02:00",
+  "capacity": 150,
+  "ticket_price": 175.00,
+  "ticket_types": [
+    {
+      "id": "tt_general",
+      "name": "General Admission",
+      "price": 175.00,
+      "includes": ["dinner", "open_bar", "party_favors"]
+    },
+    {
+      "id": "tt_vip",
+      "name": "VIP Table",
+      "price": 350.00,
+      "includes": ["dinner", "open_bar", "party_favors", "reserved_table", "bottle_service"]
+    }
+  ],
+  "status": "published"
+}
+```
+
+<Note>
+  The `end_time` may fall on the following calendar day (e.g., `02:00` for a midnight event). When displaying event times, always clarify the end date if it differs from `date`.
+</Note>
+
+## Events vs. Reservations
+
+Events and reservations share a venue and a guest, but they serve different purposes and follow different booking flows.
+
+| | Reservation | Event |
+|---|---|---|
+| **Purpose** | Book a table or space at a venue | Register for or purchase a specific experience |
+| **Pricing** | Typically free to book | Often ticketed with a purchase required |
+| **Flexibility** | Guest chooses time within availability | Date and time are fixed by the venue |
+| **Capacity tracking** | Per time slot | Per event |
+| **Guest list** | Not applicable | Managed via event guest list |
+| **Modification** | Time/size can be changed | Ticket transfers may apply; modifications limited |
+
+Use a reservation when your guest wants an open dining or lounge experience at a venue. Use an event booking when your guest is purchasing a spot in a specific, programmed experience.
+
+<Tip>
+  Display both upcoming events and standard availability on your venue detail pages. Guests often decide between a regular visit and a special event when browsing a venue.
+</Tip>
+
+## Event Types
+
+KD LLC supports three event visibility modes that control who can discover and register for an event.
+
+### Public Events
+
+Public events are open to all guests and appear in KD LLC search results and venue listings. Any guest can purchase a ticket or RSVP — no invitation required. Use public events for DJ nights, ticketed dinners, and any experience you want to promote broadly.
+
+### Private Events
+
+Private events are invite-only and do not appear in public search results. Guests can only access a private event through a direct link or by being added to the guest list by the host. Use private events for corporate buyouts, milestone celebrations, and members-only experiences.
+
+<Warning>
+  Private event links are shareable. If you need to restrict attendance strictly, use the guest list feature and disable open registration on the event.
+</Warning>
+
+### Ticketed Events
+
+Ticketed events require guests to purchase one or more tickets to secure their spot. Tickets may come in multiple tiers (see `ticket_types` above), each with its own price, inclusions, and availability. Once a ticket is purchased, the guest receives a confirmation and is added to the event's guest list automatically.
+
+## Guest Lists
+
+Every event on KD LLC maintains a guest list — a real-time record of confirmed attendees. The guest list is the source of truth for event check-in and capacity tracking.
+
+Each guest list entry includes:
+
+- **Guest name and contact info** — carried over from the ticket purchase or RSVP
+- **Ticket type** — the tier the guest purchased
+- **Check-in status** — whether the guest has been marked as arrived at the venue
+- **Party size** — for guests booking on behalf of a group
+
+<Note>
+  For ticketed events, the guest list is populated automatically when a ticket purchase is confirmed. For RSVP-based events, guests are added when their RSVP is approved.
+</Note>
+
+Use the guest list endpoint to pull a real-time attendee count, export a check-in sheet, or update check-in status as guests arrive at the door.

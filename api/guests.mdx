@@ -1,0 +1,312 @@
+---
+title: "REST API Endpoints for Guests"
+sidebarTitle: "Guests"
+description: "Create and manage guest profiles with dietary preferences, VIP status, and full reservation history using the KD LLC Guests API."
+---
+
+The Guests API lets you build rich, persistent profiles for the people who visit your venues. By storing preferences, dietary restrictions, contact details, and VIP status alongside a complete booking history, you can power personalized hospitality experiences — from greeting returning guests by name to proactively accommodating their needs before they arrive. Guest profiles are linked automatically to reservations and event tickets whenever a matching email address is used.
+
+---
+
+## Create a Guest Profile
+
+<ParamField body="name" type="string" required>
+  Full name of the guest (e.g., `"Jordan Rivera"`).
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  Guest's email address. Must be unique — if a profile already exists with this email, a `409 Conflict` error is returned. Use `PUT /guests/{id}` to update an existing profile.
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Guest's phone number including country code (e.g., `"+13055550182"`).
+</ParamField>
+
+<ParamField body="dietary_restrictions" type="array of strings">
+  List of dietary restrictions or preferences. Common values include `"vegetarian"`, `"vegan"`, `"gluten-free"`, `"kosher"`, `"halal"`, `"nut-allergy"`.
+</ParamField>
+
+<ParamField body="preferences" type="object">
+  Free-form key-value object for storing guest-specific preferences. Examples: `{"seating": "window", "music": "jazz", "drink": "champagne"}`. Keys and values must be strings.
+</ParamField>
+
+<ParamField body="vip_status" type="boolean">
+  Set to `true` to flag this guest as a VIP. Defaults to `false`. VIP guests can be filtered and prioritized in reservation workflows.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/guests \
+  -X POST \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jordan Rivera",
+    "email": "jordan.rivera@example.com",
+    "phone": "+13055550182",
+    "dietary_restrictions": ["gluten-free", "nut-allergy"],
+    "preferences": {
+      "seating": "window",
+      "drink": "champagne"
+    },
+    "vip_status": true
+  }'
+```
+
+```json
+{
+  "id": "gst_01HT7QKZMB5A9TRCX9J",
+  "name": "Jordan Rivera",
+  "email": "jordan.rivera@example.com",
+  "phone": "+13055550182",
+  "dietary_restrictions": ["gluten-free", "nut-allergy"],
+  "preferences": {
+    "seating": "window",
+    "drink": "champagne"
+  },
+  "vip_status": true,
+  "total_reservations": 0,
+  "total_events_attended": 0,
+  "created_at": "2025-01-10T15:00:00Z",
+  "updated_at": "2025-01-10T15:00:00Z"
+}
+```
+
+<ResponseField name="id" type="string">
+  Unique identifier for the guest profile. Use this to retrieve, update, or fetch reservation history.
+</ResponseField>
+
+<ResponseField name="dietary_restrictions" type="array of strings">
+  Array of dietary restriction flags stored on the profile. These are forwarded to venues automatically when a reservation is made with this guest's email.
+</ResponseField>
+
+<ResponseField name="preferences" type="object">
+  Key-value map of guest preferences. You may read and write any string keys that are meaningful to your application.
+</ResponseField>
+
+<ResponseField name="vip_status" type="boolean">
+  Whether the guest has VIP status. VIP guests appear at the top of check-in lists and can be targeted with exclusive offers.
+</ResponseField>
+
+<ResponseField name="total_reservations" type="integer">
+  Lifetime count of reservations linked to this guest profile.
+</ResponseField>
+
+<ResponseField name="total_events_attended" type="integer">
+  Lifetime count of events where this guest has a ticket or has checked in.
+</ResponseField>
+
+---
+
+## List and Search Guests
+
+Retrieve a paginated list of guest profiles. Use the query parameters to search by email, name, or VIP status.
+
+<ParamField query="email" type="string">
+  Filter by an exact email address. Useful for looking up a specific guest profile before creating a reservation.
+</ParamField>
+
+<ParamField query="name" type="string">
+  Partial name search (case-insensitive). Returns all guests whose name contains the provided string.
+</ParamField>
+
+<ParamField query="vip_status" type="boolean">
+  Pass `true` to return only VIP guests; `false` to return only non-VIP guests. Omit to return all guests.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer">
+  Results per page. Defaults to `20`. Maximum is `100`.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/guests?vip_status=true&per_page=10" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "gst_01HT7QKZMB5A9TRCX9J",
+      "name": "Jordan Rivera",
+      "email": "jordan.rivera@example.com",
+      "phone": "+13055550182",
+      "dietary_restrictions": ["gluten-free", "nut-allergy"],
+      "vip_status": true,
+      "total_reservations": 8,
+      "total_events_attended": 3,
+      "created_at": "2025-01-10T15:00:00Z"
+    },
+    {
+      "id": "gst_01HT7QKZMB5A9TRCXBL",
+      "name": "Simone Delacroix",
+      "email": "simone.d@example.com",
+      "phone": "+13055550244",
+      "dietary_restrictions": ["vegan"],
+      "vip_status": true,
+      "total_reservations": 14,
+      "total_events_attended": 7,
+      "created_at": "2024-08-03T09:30:00Z"
+    }
+  ],
+  "meta": {
+    "total": 21,
+    "page": 1,
+    "per_page": 10
+  }
+}
+```
+
+---
+
+## Get a Guest Profile
+
+Retrieve the full profile of a single guest by their unique ID.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the guest (e.g., `gst_01HT7QKZMB5A9TRCX9J`).
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/guests/gst_01HT7QKZMB5A9TRCX9J \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "id": "gst_01HT7QKZMB5A9TRCX9J",
+  "name": "Jordan Rivera",
+  "email": "jordan.rivera@example.com",
+  "phone": "+13055550182",
+  "dietary_restrictions": ["gluten-free", "nut-allergy"],
+  "preferences": {
+    "seating": "window",
+    "drink": "champagne"
+  },
+  "vip_status": true,
+  "total_reservations": 8,
+  "total_events_attended": 3,
+  "created_at": "2025-01-10T15:00:00Z",
+  "updated_at": "2025-01-18T11:22:00Z"
+}
+```
+
+---
+
+## Update a Guest Profile
+
+Replace the fields on an existing guest profile. Like the `POST /reservations` modify endpoint, only the fields you include will be changed.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the guest profile to update.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Updated full name for the guest.
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Updated phone number.
+</ParamField>
+
+<ParamField body="dietary_restrictions" type="array of strings">
+  Replacement array of dietary restriction flags. This replaces the entire existing array — include all values you want to retain.
+</ParamField>
+
+<ParamField body="preferences" type="object">
+  Updated preferences object. This performs a shallow merge, so keys you omit are preserved.
+</ParamField>
+
+<ParamField body="vip_status" type="boolean">
+  Updated VIP status flag.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/guests/gst_01HT7QKZMB5A9TRCX9J \
+  -X PUT \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dietary_restrictions": ["gluten-free", "nut-allergy", "dairy-free"],
+    "vip_status": true
+  }'
+```
+
+```json
+{
+  "id": "gst_01HT7QKZMB5A9TRCX9J",
+  "name": "Jordan Rivera",
+  "email": "jordan.rivera@example.com",
+  "phone": "+13055550182",
+  "dietary_restrictions": ["gluten-free", "nut-allergy", "dairy-free"],
+  "preferences": {
+    "seating": "window",
+    "drink": "champagne"
+  },
+  "vip_status": true,
+  "total_reservations": 8,
+  "total_events_attended": 3,
+  "created_at": "2025-01-10T15:00:00Z",
+  "updated_at": "2025-01-19T14:10:00Z"
+}
+```
+
+---
+
+## Get Guest Reservation History
+
+Returns a paginated, reverse-chronological list of all reservations linked to a guest profile.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the guest.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer">
+  Results per page. Defaults to `20`. Maximum is `100`.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/guests/gst_01HT7QKZMB5A9TRCX9J/reservations?page=1&per_page=5" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "res_01HR2PKZMB5A9TRCX8F",
+      "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+      "venue_name": "Azul Rooftop",
+      "date": "2025-02-15",
+      "time": "20:00",
+      "party_size": 6,
+      "status": "confirmed",
+      "confirmation_code": "KDLLC-78341",
+      "created_at": "2025-01-10T15:22:00Z"
+    },
+    {
+      "id": "res_01HP9LKZMB5A9TRCX5C",
+      "venue_id": "ven_01HQ8F3KZMB5A9TRCX7E",
+      "venue_name": "Ceviche House",
+      "date": "2024-12-31",
+      "time": "21:00",
+      "party_size": 4,
+      "status": "confirmed",
+      "confirmation_code": "KDLLC-65022",
+      "created_at": "2024-12-10T10:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 8,
+    "page": 1,
+    "per_page": 5
+  }
+}
+```

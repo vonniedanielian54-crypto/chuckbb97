@@ -1,0 +1,186 @@
+---
+title: "Troubleshoot Common KD LLC Issues"
+sidebarTitle: "Troubleshooting"
+description: "Step-by-step guidance for resolving API errors, reservation problems, webhook failures, notification issues, and other common KD LLC issues."
+---
+
+Most issues on KD LLC have straightforward causes and quick fixes. This guide walks you through the most frequently reported problems and explains exactly what to check and how to resolve each one. If you work through the steps below and the problem persists, contact the team at [support@kdllc.com](mailto:support@kdllc.com) with the details of what you have tried.
+
+## Common Issues
+
+<AccordionGroup>
+
+<Accordion title="API returns 401 Unauthorized">
+A `401 Unauthorized` response means the server could not authenticate your request. Work through the following checks in order:
+
+**1. Confirm the Authorization header format**
+
+Your request must include the API key using a `Bearer` token in the `Authorization` header:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+A common mistake is omitting the `Bearer` prefix or adding extra spaces:
+
+```http
+# Incorrect — missing Bearer prefix
+Authorization: YOUR_API_KEY
+
+# Incorrect — extra space after colon
+Authorization:  Bearer YOUR_API_KEY
+```
+
+**2. Confirm the key has not been revoked**
+
+Navigate to **Settings → API Keys** and verify the key you are using is listed and shows an **Active** status. If it shows **Revoked**, generate a new key and update your integration.
+
+**3. Confirm you are using the correct key**
+
+If you have multiple keys, make sure the key in your request matches the one configured for that environment. It is easy to accidentally use a staging key against the production API or vice versa.
+
+**4. Check for whitespace or encoding errors**
+
+If you copied the key from a document or terminal, ensure no invisible whitespace characters were included. Paste the key into a plain-text editor to inspect it before use.
+</Accordion>
+
+<Accordion title="API returns 429 Too Many Requests">
+A `429 Too Many Requests` response means your integration has exceeded its rate limit for the current window. The API includes a `Retry-After` header in the response that tells you how many seconds to wait before your next request.
+
+**Immediate fix:**
+
+Stop sending requests and wait for the duration specified in `Retry-After` before retrying.
+
+**Longer-term fixes:**
+
+- **Implement exponential backoff.** When you receive a `429`, wait and retry with increasing delays (for example, 1 s, 2 s, 4 s, 8 s) rather than hammering the endpoint at a fixed interval.
+- **Cache responses where possible.** If your integration reads the same venue or reservation data repeatedly, store the response locally and reuse it within a reasonable TTL instead of making redundant API calls.
+- **Batch requests.** Use list endpoints rather than looping over individual resource endpoints when you need to retrieve multiple records.
+- **Upgrade your plan.** If your use case legitimately requires higher throughput, contact [support@kdllc.com](mailto:support@kdllc.com) to discuss an Enterprise plan with custom rate limits.
+
+Review the [rate limit table](/support/faq#what-rate-limits-apply-to-the-api) to understand the limits for your current plan.
+</Accordion>
+
+<Accordion title="Reservation not confirmed after submitting">
+If a reservation submission appears to succeed but the booking does not show as confirmed, check the following:
+
+**1. Check venue availability**
+
+The time slot you selected may have been taken by another guest between the moment you viewed availability and the moment you submitted. Return to the venue's booking page and choose an available time slot.
+
+**2. Check party size limits**
+
+Each venue sets a `default_party_size_max`. If your party exceeds that limit, the reservation is rejected. The booking page should display the maximum, but if you submitted via the API, verify the `party_size` in your request does not exceed the venue's configured maximum.
+
+**3. Auto-confirm may be disabled**
+
+If the venue does not have `auto_confirm` enabled, the reservation enters a **Pending** state and requires manual approval from the venue operator. Check **My Reservations** — a status of **Pending Approval** is normal and means the venue has been notified. You will receive a confirmation or decline notification within the venue's stated response window.
+
+**4. Check for a confirmation email**
+
+If you submitted the reservation more than 5 minutes ago and received no email, check your spam folder. If the email is not there, verify the email address on your profile under **Settings → Profile** is correct.
+</Accordion>
+
+<Accordion title="Webhook endpoint not receiving events">
+If your webhook URL is configured but events are not arriving, work through the following steps:
+
+**1. Verify the URL is publicly accessible**
+
+Your webhook endpoint must be reachable from the public internet over HTTPS. KD LLC cannot deliver events to `localhost`, private IP addresses, or URLs behind a VPN or firewall. Use a tool like [webhook.site](https://webhook.site) to confirm KD LLC can reach an external endpoint before troubleshooting your own server.
+
+**2. Check the endpoint's response code**
+
+KD LLC considers a delivery successful only if your endpoint responds with an HTTP `2xx` status code within 10 seconds. If your server returns a `4xx` or `5xx`, or times out, KD LLC retries the delivery up to 3 times with exponential backoff. Check your server logs for errors around the expected delivery time.
+
+**3. Confirm the correct events are subscribed**
+
+Go to **Settings → Notifications → Webhooks**, click on your endpoint, and confirm that the event types you expect (for example, `reservation.confirmed`) are toggled on.
+
+**4. Verify your signature verification logic is not rejecting valid requests**
+
+If you have implemented `X-KD-Signature` verification and your endpoint returns a non-`2xx` response when the signature check fails, a bug in your verification code could cause all events to be silently rejected. Temporarily log the raw header and body to confirm the signature is being computed correctly against the raw (unparsed) request body.
+
+<Warning>
+Do not parse or modify the request body before computing the HMAC signature for comparison. Any transformation — including JSON pretty-printing — will change the byte sequence and cause every signature check to fail.
+</Warning>
+</Accordion>
+
+<Accordion title="Cannot find a venue in search results">
+If a venue you are looking for does not appear in the KD LLC search results, try the following:
+
+**1. Clear active filters**
+
+Open the search panel and reset all filters — category, neighborhood, date, time, and party size. A venue may not appear because it does not have availability on the selected date or cannot accommodate the party size you entered.
+
+**2. Expand the search area**
+
+If you are searching by map or neighborhood, zoom out or switch to a broader city-level search. The venue may be in an adjacent area.
+
+**3. Search by exact name**
+
+Type the full venue name into the search bar. Some venues are listed under a slightly different trade name than their common public name.
+
+**4. Check regional availability**
+
+KD LLC currently operates in select metropolitan areas. If the venue is located in a region where KD LLC is not yet active, it will not appear in results. Check the [Supported Cities](/) page for the current coverage map.
+
+**5. The venue may not yet be listed**
+
+If you are a guest looking for a specific venue, you can request it be added by clicking **Suggest a Venue** at the bottom of the search results page.
+</Accordion>
+
+<Accordion title="Email notifications are not arriving">
+If you are not receiving expected notification emails from KD LLC, follow these steps:
+
+**1. Check your spam or junk folder**
+
+Email providers sometimes misclassify automated notification emails. Search for emails from `no-reply@kdllc.com` in your spam folder and mark them as **Not Spam** to improve future delivery.
+
+**2. Verify your email address**
+
+Go to **Settings → Profile** and confirm the email address on file is correct. If you recently changed your email address, make sure you completed the verification step sent to the new address.
+
+**3. Check your notification preferences**
+
+Navigate to **Settings → Notifications → Email** and confirm that the specific event type (for example, **Reservation Confirmed**) is toggled on.
+
+**4. Check for a delivery block**
+
+If you have previously marked a KD LLC email as spam, your email provider may have blocked the sending domain. Add `no-reply@kdllc.com` to your contacts or safe-sender list.
+
+**5. Contact support**
+
+If none of the above resolves the issue, contact [support@kdllc.com](mailto:support@kdllc.com) with your account email and the approximate time and type of notification you expected to receive. The support team can check delivery logs on your behalf.
+</Accordion>
+
+</AccordionGroup>
+
+## Error Code Reference
+
+Use this table to quickly identify what an API error code means and how to resolve it.
+
+| Code | Name | Meaning | Resolution |
+|---|---|---|---|
+| `400` | Bad Request | The request body or query parameters are malformed or missing required fields | Review the API reference for the endpoint and correct the request structure |
+| `401` | Unauthorized | The API key is missing, malformed, or revoked | Check the `Authorization` header format and confirm the key is active |
+| `403` | Forbidden | The authenticated account does not have permission to perform this action | Confirm the API key has the required scopes, or upgrade your plan |
+| `404` | Not Found | The requested resource does not exist | Verify the resource ID is correct and that the resource has not been deleted |
+| `409` | Conflict | The request conflicts with existing data (for example, a duplicate reservation at the same time) | Check for an existing record before creating; resolve the conflict and retry |
+| `422` | Unprocessable Entity | The request is structurally valid but fails business-logic validation (for example, party size exceeds venue maximum) | Read the `errors` array in the response body for field-level detail |
+| `429` | Too Many Requests | The rate limit for your plan has been exceeded | Wait for the `Retry-After` duration and retry with exponential backoff |
+| `500` | Internal Server Error | An unexpected error occurred on the KD LLC server | Retry after a brief wait; if the error persists, contact support with the request ID from the response |
+
+## Contact Support
+
+If you have worked through the relevant section above and the issue is unresolved, the support team is here to help.
+
+- **Email:** [support@kdllc.com](mailto:support@kdllc.com)
+- **Live Chat:** Available in the dashboard during business hours (Monday–Friday, 9 AM–6 PM ET)
+
+When you reach out, include:
+- Your account email address
+- The affected reservation ID, venue ID, or API key label (where applicable)
+- The exact error message or HTTP response body
+- A description of the steps you have already tried
+
+This information allows the team to diagnose your issue without back-and-forth and resolve it as quickly as possible.

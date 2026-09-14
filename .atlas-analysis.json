@@ -1,13 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
+  "projectType": "saas",
+  "projectName": "KD LLC",
+  "projectDescription": "A hospitality and venue management platform for dining, nightlife, and event experiences.",
   "theme": "almond",
-  "name": "KD LLC",
-  "colors": {
-    "primary": "#ef7025",
-    "light": "#eec9bc",
-    "dark": "#4fa1ab"
-  },
-  "favicon": "/favicon.svg",
+  "primaryColor": "#ef7025",
+  "lightColor": "#eec9bc",
+  "darkColor": "#4fa1ab",
   "navigation": {
     "tabs": [
       {
@@ -77,20 +75,25 @@
       }
     ]
   },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:support@kdllc.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Sign In",
-      "href": "https://app.kdllc.com"
-    }
-  },
-  "footer": {
-    "socials": {}
-  }
+  "keyFeatures": [
+    "Venue discovery and browsing",
+    "Online reservation management",
+    "Event planning and ticketing",
+    "Guest list management",
+    "Real-time availability updates",
+    "Notification and reminder system",
+    "Third-party calendar integrations"
+  ],
+  "publicApiSurface": [
+    "GET /venues",
+    "GET /venues/{id}",
+    "POST /reservations",
+    "GET /reservations/{id}",
+    "PUT /reservations/{id}",
+    "DELETE /reservations/{id}",
+    "GET /events",
+    "POST /events",
+    "GET /guests",
+    "POST /guests"
+  ]
 }

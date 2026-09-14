@@ -1,0 +1,98 @@
+---
+title: "Venues: Restaurants, Bars, Clubs & Event Spaces"
+sidebarTitle: "Venues"
+description: "Learn how venues work in KD LLC — from properties and availability to searching and filtering dining, nightlife, and event spaces."
+---
+
+Venues are the foundation of everything on KD LLC. Whether you're booking a table at a rooftop restaurant, reserving a private lounge for a birthday, or planning a night out at a members-only club, every experience starts with a venue. Understanding how venues are structured helps you discover the right space, check availability, and build seamless booking flows for your guests.
+
+## What Is a Venue?
+
+A venue is any restaurant, bar, lounge, club, or event space listed on the KD LLC platform. Each venue represents a real, physical location where guests can make reservations, attend events, or purchase experiences. Venues carry rich metadata — from operating hours and cuisine type to amenities and capacity — so guests can make informed decisions before they book.
+
+KD LLC supports the following venue types:
+
+| Type | Description |
+|---|---|
+| `restaurant` | Full-service dining establishments |
+| `bar` | Cocktail bars, sports bars, and taprooms |
+| `lounge` | Upscale lounges and social spaces |
+| `club` | Nightclubs and dance venues |
+| `event-space` | Dedicated event and private dining rooms |
+
+## Venue Properties
+
+Every venue object contains a standard set of properties that describe its identity, location, capacity, and offerings.
+
+| Property | Type | Description |
+|---|---|---|
+| `id` | string | Unique identifier for the venue |
+| `name` | string | Display name of the venue |
+| `type` | string | Venue category (see types above) |
+| `address` | object | Full street address including city, state, and ZIP |
+| `capacity` | integer | Maximum guest capacity |
+| `cuisine` | string | Primary cuisine or food style |
+| `hours` | object | Operating hours keyed by day of the week |
+| `amenities` | array | List of available amenities |
+| `contact` | object | Phone number, email, and website |
+
+### Example Venue Object
+
+```json
+{
+  "id": "venue_abc123",
+  "name": "The Grand Lounge",
+  "type": "lounge",
+  "address": {
+    "street": "123 Fifth Avenue",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10001"
+  },
+  "capacity": 200,
+  "cuisine": "Contemporary American",
+  "hours": {
+    "monday": "5pm-2am",
+    "tuesday": "5pm-2am"
+  },
+  "amenities": ["valet", "private_dining", "full_bar"]
+}
+```
+
+<Note>
+  Hours are returned as human-readable strings per day. Days not included in the `hours` object indicate the venue is closed on that day.
+</Note>
+
+## Venue Availability
+
+Before confirming a reservation or event booking, always check a venue's available time slots. Availability reflects the venue's real-time capacity and existing bookings for a given date and party size.
+
+To check availability, query the venue's open slots by providing:
+
+- **Venue ID** — the unique `id` of the venue
+- **Date** — the requested visit date in `YYYY-MM-DD` format
+- **Party size** — the number of guests in your party
+- **Time preference** *(optional)* — a preferred window such as `"evening"` or a specific time like `"7:30pm"`
+
+The platform returns a list of confirmed open time slots ranked by match quality. Only slots returned in an availability response can be booked — attempting to reserve an unavailable slot will return an error.
+
+<Tip>
+  Request availability early in your booking flow and display open slots to guests in real time. Slots can fill quickly, especially on weekends and holidays.
+</Tip>
+
+## Searching and Filtering Venues
+
+KD LLC lets you search across all listed venues using a flexible set of filters. Combine filters to surface the most relevant spaces for your guests.
+
+**Supported filters:**
+
+- **`type`** — Filter by venue category (`restaurant`, `bar`, `lounge`, `club`, `event-space`)
+- **`city`** — Limit results to a specific city
+- **`capacity`** — Set a minimum or maximum guest capacity
+- **`cuisine`** — Match by cuisine style (e.g., `"Italian"`, `"Contemporary American"`)
+- **`amenities`** — Require specific amenities such as `"valet"` or `"private_dining"`
+- **`date` + `party_size`** — Return only venues with availability on a given date
+
+<Warning>
+  Venue listings, hours, and amenities can change. Always fetch fresh venue data before presenting details to a guest rather than relying on cached results.
+</Warning>

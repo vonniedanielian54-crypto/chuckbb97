@@ -1,0 +1,126 @@
+---
+title: "KD LLC REST API Overview and Concepts"
+sidebarTitle: "Overview"
+description: "Learn the core concepts of the KD LLC REST API: base URL, authentication, rate limits, pagination, versioning, and error handling."
+---
+
+The KD LLC REST API gives you programmatic access to the full suite of hospitality and venue management capabilities — from browsing venues and checking availability to creating reservations, managing events, and maintaining guest profiles. All requests and responses use JSON, and every interaction follows standard REST conventions so the API feels familiar from day one.
+
+## Base URL
+
+All API requests are made to the following base URL:
+
+```
+https://api.kdllc.com/v1
+```
+
+The version segment (`v1`) is part of every endpoint path. When breaking changes are introduced, a new version (`v2`) will be released and the previous version will remain available for a deprecation period so you have time to migrate.
+
+## Request and Response Format
+
+The KD LLC API accepts JSON request bodies and returns JSON responses for all endpoints. Set the `Content-Type` header to `application/json` on any request that includes a body.
+
+```bash
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json"
+```
+
+Standard HTTP methods are used throughout:
+
+| Method | Usage |
+|--------|-------|
+| `GET` | Retrieve one or more resources |
+| `POST` | Create a new resource |
+| `PUT` | Replace a resource entirely |
+| `PATCH` | Partially update a resource |
+| `DELETE` | Remove or cancel a resource |
+
+## Rate Limits
+
+Rate limits are enforced per API key on a rolling 60-second window. If you exceed your limit, the API returns a `429 Too Many Requests` response. Retry after the number of seconds indicated in the `Retry-After` response header.
+
+| Plan | Requests per Minute |
+|------|-------------------|
+| Free | 100 |
+| Pro | 1,000 |
+| Enterprise | Unlimited |
+
+## Pagination
+
+All list endpoints support cursor-free, page-based pagination via the `page` and `per_page` query parameters. Every paginated response includes a `meta` object so you can determine how many total records exist and whether more pages are available.
+
+**Query parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `page` | integer | `1` | The page number to retrieve. |
+| `per_page` | integer | `20` | Number of results per page. Maximum is `100`. |
+
+**Pagination response structure:**
+
+```json
+{
+  "data": [...],
+  "meta": {
+    "total": 143,
+    "page": 2,
+    "per_page": 20
+  }
+}
+```
+
+Use `meta.total` and `meta.per_page` to calculate the total number of pages: `ceil(meta.total / meta.per_page)`.
+
+## Versioning
+
+The current stable API version is **v1**, reflected in the base URL. KD LLC follows a compatibility-first policy — additive changes (new fields, new optional parameters, new endpoints) are made within the current version without notice. Breaking changes — such as removing fields, renaming parameters, or altering response shapes — will always be introduced in a new version (`v2`, etc.).
+
+You will receive advance notice of any new version release and a deprecation timeline for the previous version before it is retired.
+
+## Error Responses
+
+When a request cannot be completed, the API returns an appropriate HTTP status code alongside a structured JSON error body. The `error.code` field is a machine-readable string you can use for programmatic error handling, while `error.message` provides a human-readable explanation.
+
+```json
+{
+  "error": {
+    "code": "reservation_not_found",
+    "message": "No reservation found with the provided ID.",
+    "status": 404
+  }
+}
+```
+
+**Common error codes:**
+
+| Status | Code | Meaning |
+|--------|------|---------|
+| `400` | `invalid_request` | Missing or malformed request parameters. |
+| `401` | `unauthorized` | API key is missing or invalid. |
+| `403` | `forbidden` | Your API key does not have permission for this resource. |
+| `404` | `not_found` | The requested resource does not exist. |
+| `409` | `conflict` | The request conflicts with existing data (e.g., double-booking). |
+| `422` | `unprocessable_entity` | Request body is valid JSON but fails business-logic validation. |
+| `429` | `rate_limit_exceeded` | You have exceeded your plan's rate limit. |
+| `500` | `internal_error` | An unexpected error occurred on our end. |
+
+## Explore the API
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="key" href="/api/authentication">
+    Learn how to generate API keys and authenticate every request.
+  </Card>
+  <Card title="Venues" icon="building" href="/api/venues">
+    Browse venues, filter by type and city, and check real-time availability.
+  </Card>
+  <Card title="Reservations" icon="calendar-check" href="/api/reservations">
+    Create, retrieve, modify, and cancel dining and venue reservations.
+  </Card>
+  <Card title="Events" icon="ticket" href="/api/events">
+    Manage events end-to-end — from creation and ticketing to attendee lists.
+  </Card>
+  <Card title="Guests" icon="users" href="/api/guests">
+    Build and manage rich guest profiles including VIP status and preferences.
+  </Card>
+</CardGroup>

@@ -1,0 +1,114 @@
+---
+title: "Connect KD LLC with External Services"
+sidebarTitle: "Integrations"
+description: "Sync reservations with your calendar, connect your POS system, link your CRM, and automate workflows using Zapier, Make, or custom webhooks."
+---
+
+KD LLC connects to the tools your team already relies on, so you never have to manage data in two places at once. From calendar sync to point-of-sale check-ins to full CRM pipelines, the integrations available under **Settings → Integrations** extend the platform to fit your existing operational stack.
+
+## Available Integration Categories
+
+<CardGroup cols={2}>
+  <Card title="Calendar" icon="calendar">
+    Sync reservations and events with Google Calendar, Apple Calendar, and Microsoft Outlook automatically.
+  </Card>
+  <Card title="Point of Sale" icon="credit-card">
+    Connect your POS system to streamline guest check-in and link reservation data to transactions.
+  </Card>
+  <Card title="CRM" icon="users">
+    Push guest profiles and reservation history to Salesforce and HubSpot to power your marketing and retention workflows.
+  </Card>
+  <Card title="Automation" icon="bolt">
+    Use Zapier or Make (Integromat) pre-built templates to connect KD LLC to thousands of additional apps without writing code.
+  </Card>
+</CardGroup>
+
+## Calendar Integrations
+
+Connecting a calendar integration ensures that every confirmed reservation and published event automatically appears in your preferred calendar app. This keeps your schedule accurate without manual entry.
+
+### Supported Calendar Platforms
+
+| Platform | Sync Direction | Notes |
+|---|---|---|
+| **Google Calendar** | KD LLC → Google | OAuth 2.0 authorization; reservations appear as calendar events |
+| **Apple Calendar** | KD LLC → Apple | Uses iCal feed subscription; refreshes every 15 minutes |
+| **Microsoft Outlook** | KD LLC → Outlook | OAuth 2.0 via Microsoft 365; supports shared calendars |
+
+### Setting Up Google Calendar (Step-by-Step)
+
+1. Open **Settings → Integrations** in your KD LLC dashboard.
+2. Locate the **Google Calendar** card and click **Connect**.
+3. You are redirected to Google's authorization page. Sign in with the Google account that owns the calendar you want to sync to.
+4. Grant KD LLC permission to create and manage calendar events on your behalf.
+5. After authorization, you are returned to KD LLC. Select the target calendar from the dropdown (for example, a dedicated **KD LLC Reservations** calendar).
+6. Click **Save** to activate the sync.
+
+New confirmed reservations will appear in your Google Calendar within seconds. Cancellations and modifications are reflected automatically.
+
+<Note>
+To disconnect Google Calendar at any time, return to **Settings → Integrations → Google Calendar** and click **Disconnect**. Existing calendar events created by KD LLC are not deleted from Google Calendar when you disconnect.
+</Note>
+
+## POS Integrations
+
+Linking your point-of-sale system to KD LLC lets your front-of-house staff check in guests directly from the POS terminal and automatically associates reservation data with the resulting transaction record.
+
+### Supported POS Systems
+
+- **Toast**
+- **Square**
+- **Lightspeed Restaurant**
+- **Clover**
+- **Revel Systems**
+
+To connect a POS system, navigate to **Settings → Integrations → Point of Sale**, select your provider, and follow the provider-specific authorization steps. Most integrations require an API key or OAuth flow initiated from your POS account's developer or integrations settings panel.
+
+<Warning>
+POS integrations are available on the **Operator Pro** and **Enterprise** plans only. If you do not see the POS section under Integrations, upgrade your plan under **Settings → Billing**.
+</Warning>
+
+## CRM Integrations
+
+CRM integrations push guest profile data and reservation history into your customer relationship management platform, enabling personalized follow-up campaigns, loyalty tracking, and VIP identification.
+
+### Salesforce
+
+1. Navigate to **Settings → Integrations → Salesforce**.
+2. Click **Connect to Salesforce** and authorize KD LLC via OAuth.
+3. Map KD LLC guest fields to Salesforce Contact fields using the field-mapping table.
+4. Choose whether to sync all guests or only guests with at least one confirmed reservation.
+5. Click **Enable Sync**.
+
+### HubSpot
+
+1. Navigate to **Settings → Integrations → HubSpot**.
+2. Click **Connect to HubSpot** and authorize the integration.
+3. Configure which KD LLC events (reservation confirmed, cancellation, repeat visit) create or update HubSpot Contact records.
+4. Optionally enable **Deal Creation** to log high-value reservations as HubSpot Deals.
+5. Click **Save**.
+
+<Tip>
+Use HubSpot's workflow automation to send a win-back email to guests who have not returned to your venue in 60 days, triggered by the last reservation date synced from KD LLC.
+</Tip>
+
+## Zapier and Make (Integromat)
+
+Zapier and Make let you connect KD LLC to thousands of additional apps using pre-built automation templates — no code required.
+
+### Zapier
+
+1. Visit [zapier.com](https://zapier.com) and search for **KD LLC** in the app directory.
+2. Browse available Zap templates (for example, *New KD LLC Reservation → Add Row in Google Sheets*).
+3. Click **Use this Zap**, authenticate your KD LLC account using your API key, and follow the setup wizard.
+
+### Make (Integromat)
+
+1. Open your Make workspace and create a new Scenario.
+2. Add the **KD LLC** module from the app library.
+3. Connect your account by entering your API key when prompted.
+4. Choose a trigger (for example, **Watch Reservations**) and chain it to any downstream modules your workflow requires.
+
+<Tip>
+If none of the listed integrations meet your needs, use KD LLC's [webhook notifications](/configuration/notifications#webhook-notifications) to build a fully custom integration. Any service that can receive an HTTP POST request — including your own internal APIs — can be connected this way without relying on a third-party automation platform.
+</Tip>

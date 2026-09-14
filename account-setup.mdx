@@ -1,0 +1,88 @@
+---
+title: "Set Up Your KD LLC Account"
+sidebarTitle: "Account Setup"
+description: "Sign up, configure your profile, generate API keys, invite team members, and choose the right KD LLC plan for your business."
+---
+
+Setting up your KD LLC account takes just a few minutes. This guide walks you through registration, profile configuration, API key generation, and team management so you can start managing venues and reservations right away.
+
+## Sign up
+
+To create your KD LLC account, follow these steps:
+
+1. Visit [app.kdllc.com](https://app.kdllc.com) and click **Sign Up**.
+2. Enter your full name, business email address, and a strong password.
+3. Read and accept the Terms of Service, then click **Create Account**.
+4. Check your inbox for a verification email from KD LLC and click the **Verify Email** link inside.
+
+Once your email is verified, you'll be directed to your KD LLC dashboard and can begin using the platform immediately.
+
+<Note>
+  If you don't receive a verification email within a few minutes, check your spam or junk folder. You can also request a new verification link from the login page.
+</Note>
+
+## Configure your profile
+
+After signing in, update your profile so your team and guests can identify you correctly.
+
+1. Click your avatar in the top-right corner and select **Profile Settings**.
+2. Set your **Display Name** — this appears in reservation confirmations and team activity logs.
+3. Add your **Contact Information**, including a phone number for account recovery.
+4. Set your **Timezone Preference** so that reservation times and event schedules display in your local time across the dashboard and API responses.
+
+Click **Save Changes** when you're done.
+
+## Generate API keys
+
+KD LLC uses API keys to authenticate requests to the KD LLC API. You can create multiple keys — for example, separate keys for development, staging, and production environments.
+
+1. From your dashboard, go to **Settings → API Keys**.
+2. Click **Create New Key**.
+3. Enter a descriptive label for the key (for example, `production-server` or `local-dev`).
+4. Click **Generate** and copy the key immediately.
+
+Your API key follows this format:
+
+```
+kdllc_sk_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+```
+
+<Warning>
+  KD LLC displays your API key only once at the moment of creation. Store it immediately in a secure secrets manager (such as AWS Secrets Manager, HashiCorp Vault, or a `.env` file excluded from version control). Never embed API keys directly in client-side code, public repositories, or shared documents. If a key is compromised, revoke it immediately from **Settings → API Keys** and generate a replacement.
+</Warning>
+
+To revoke a key at any time, find it in the **API Keys** list and click **Revoke**. Revoked keys stop working instantly.
+
+## Manage team members
+
+You can invite colleagues to your KD LLC organization so they can access the dashboard and shared resources.
+
+1. Navigate to **Settings → Team**.
+2. Click **Invite Member**.
+3. Enter your colleague's email address and select a role:
+   - **Admin** — full access to settings, billing, and all venues.
+   - **Manager** — can manage reservations and events, but cannot access billing or API keys.
+   - **Viewer** — read-only access to reservations and reports.
+4. Click **Send Invitation**.
+
+Your colleague will receive an email invitation with a link to join your organization. They must accept the invitation within 48 hours before the link expires.
+
+<Tip>
+  Use role-based access to follow the principle of least privilege — give team members only the permissions they need for their day-to-day work.
+</Tip>
+
+## Account plans
+
+KD LLC offers three tiers to fit businesses of every size.
+
+| Plan | Best for | Venues | API calls / month | Team members |
+|---|---|---|---|---|
+| **Free** | Individuals and early-stage operators | Up to 2 | 1,000 | 1 |
+| **Pro** | Growing venues and event planners | Up to 20 | 50,000 | 10 |
+| **Enterprise** | Multi-location groups and large platforms | Unlimited | Unlimited | Unlimited |
+
+To upgrade your plan, go to **Settings → Billing** and select **Change Plan**. Enterprise customers can contact [sales@kdllc.com](mailto:sales@kdllc.com) for custom pricing and SLA options.
+
+<Note>
+  All paid plans include priority email support, advanced analytics, and access to webhook notifications. Enterprise plans also include a dedicated account manager and custom integration support.
+</Note>

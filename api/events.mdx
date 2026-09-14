@@ -1,0 +1,320 @@
+---
+title: "REST API Endpoints for Events"
+sidebarTitle: "Events"
+description: "Create and manage venue events, control publishing status, sell tickets, and retrieve paginated attendee lists using the KD LLC Events API."
+---
+
+The Events API lets you manage the full lifecycle of hosted events across KD LLC venues — from creating a draft event and configuring ticket types, to publishing it for guests to discover, and monitoring your attendee list in real time. Whether you're organizing a ticketed dinner experience, a nightlife event, or a private venue buyout, this API gives you the control you need.
+
+---
+
+## List Events
+
+Retrieve a paginated list of events, optionally filtered by venue, date range, or status.
+
+<ParamField query="venue_id" type="string">
+  Return only events hosted at the specified venue.
+</ParamField>
+
+<ParamField query="date_from" type="string">
+  Include events with a date on or after this value. Format: `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="date_to" type="string">
+  Include events with a date on or before this value. Format: `YYYY-MM-DD`.
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by event status. Accepted values: `draft`, `published`, `cancelled`.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer">
+  Results per page. Defaults to `20`. Maximum is `100`.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/events?venue_id=ven_01HQ8F3KZMB5A9TRCX6D&status=published&date_from=2025-03-01&date_to=2025-03-31" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "evt_01HS4NKZMB5A9TRCX2G",
+      "name": "Latin Jazz Night",
+      "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+      "venue_name": "Azul Rooftop",
+      "date": "2025-03-08",
+      "start_time": "20:00",
+      "end_time": "24:00",
+      "capacity": 80,
+      "tickets_sold": 52,
+      "ticket_price": 45.00,
+      "status": "published"
+    },
+    {
+      "id": "evt_01HS4NKZMB5A9TRCX3H",
+      "name": "Rosé Garden Brunch",
+      "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+      "venue_name": "Azul Rooftop",
+      "date": "2025-03-22",
+      "start_time": "11:00",
+      "end_time": "15:00",
+      "capacity": 60,
+      "tickets_sold": 28,
+      "ticket_price": 75.00,
+      "status": "published"
+    }
+  ],
+  "meta": {
+    "total": 2,
+    "page": 1,
+    "per_page": 20
+  }
+}
+```
+
+---
+
+## Create an Event
+
+Create a new event associated with a venue. Events are created in `draft` status by default and are not visible to the public until you publish them using `PATCH /events/{id}`.
+
+<ParamField body="venue_id" type="string" required>
+  The ID of the venue where the event will be held.
+</ParamField>
+
+<ParamField body="name" type="string" required>
+  The public-facing name of the event (e.g., `"Latin Jazz Night"`).
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  A full description of the event. Supports plain text; markdown formatting is not rendered.
+</ParamField>
+
+<ParamField body="date" type="string" required>
+  Event date in `YYYY-MM-DD` format.
+</ParamField>
+
+<ParamField body="start_time" type="string" required>
+  Event start time in `HH:MM` 24-hour format.
+</ParamField>
+
+<ParamField body="end_time" type="string" required>
+  Event end time in `HH:MM` 24-hour format. Must be after `start_time`.
+</ParamField>
+
+<ParamField body="capacity" type="integer" required>
+  Maximum number of attendees. Cannot exceed the venue's own capacity.
+</ParamField>
+
+<ParamField body="ticket_price" type="number" required>
+  Default ticket price in USD (e.g., `45.00`). Use `0` for free events.
+</ParamField>
+
+<ParamField body="ticket_types" type="array">
+  Optional array of ticket tier objects to override the default price. Each object supports `name` (string), `price` (number), and `quantity` (integer) keys. Example: `[{"name": "VIP", "price": 120.00, "quantity": 10}]`.
+</ParamField>
+
+<ParamField body="status" type="string">
+  Initial status of the event. Defaults to `"draft"`. Pass `"published"` to make the event immediately visible.
+</ParamField>
+
+```bash
+curl https://api.kdllc.com/v1/events \
+  -X POST \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+    "name": "Latin Jazz Night",
+    "description": "An unforgettable evening of live Latin jazz on the rooftop, featuring cocktails and small plates from our resident chef.",
+    "date": "2025-03-08",
+    "start_time": "20:00",
+    "end_time": "24:00",
+    "capacity": 80,
+    "ticket_price": 45.00,
+    "ticket_types": [
+      {"name": "General Admission", "price": 45.00, "quantity": 70},
+      {"name": "VIP Table", "price": 120.00, "quantity": 10}
+    ],
+    "status": "draft"
+  }'
+```
+
+```json
+{
+  "id": "evt_01HS4NKZMB5A9TRCX2G",
+  "name": "Latin Jazz Night",
+  "description": "An unforgettable evening of live Latin jazz on the rooftop, featuring cocktails and small plates from our resident chef.",
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "venue_name": "Azul Rooftop",
+  "date": "2025-03-08",
+  "start_time": "20:00",
+  "end_time": "24:00",
+  "capacity": 80,
+  "tickets_sold": 0,
+  "ticket_price": 45.00,
+  "ticket_types": [
+    {"name": "General Admission", "price": 45.00, "quantity": 70},
+    {"name": "VIP Table", "price": 120.00, "quantity": 10}
+  ],
+  "status": "draft",
+  "created_at": "2025-01-15T11:00:00Z",
+  "updated_at": "2025-01-15T11:00:00Z"
+}
+```
+
+<ResponseField name="id" type="string">
+  Unique identifier for the event. Use this to retrieve, update, or list attendees.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Current event status: `draft`, `published`, or `cancelled`. Only `published` events are visible to guests.
+</ResponseField>
+
+<ResponseField name="tickets_sold" type="integer">
+  Number of tickets sold so far. Use alongside `capacity` to calculate remaining availability.
+</ResponseField>
+
+<ResponseField name="ticket_types" type="array">
+  Array of ticket tier objects. Present when custom tiers were provided at creation.
+</ResponseField>
+
+---
+
+## Get an Event
+
+Retrieve the full details of a single event by its ID.
+
+```bash
+curl https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "id": "evt_01HS4NKZMB5A9TRCX2G",
+  "name": "Latin Jazz Night",
+  "description": "An unforgettable evening of live Latin jazz on the rooftop, featuring cocktails and small plates from our resident chef.",
+  "venue_id": "ven_01HQ8F3KZMB5A9TRCX6D",
+  "venue_name": "Azul Rooftop",
+  "date": "2025-03-08",
+  "start_time": "20:00",
+  "end_time": "24:00",
+  "capacity": 80,
+  "tickets_sold": 52,
+  "ticket_price": 45.00,
+  "ticket_types": [
+    {"name": "General Admission", "price": 45.00, "quantity": 70},
+    {"name": "VIP Table", "price": 120.00, "quantity": 10}
+  ],
+  "status": "published",
+  "created_at": "2025-01-15T11:00:00Z",
+  "updated_at": "2025-01-20T09:30:00Z"
+}
+```
+
+---
+
+## Update an Event
+
+Use `PATCH /events/{id}` to make partial updates to an event. Only the fields you provide will be changed. This endpoint is commonly used to publish a draft event or adjust capacity after creation.
+
+<ParamField body="status" type="string">
+  Update the event's visibility. Pass `"published"` to make a draft event live, or `"cancelled"` to cancel it.
+</ParamField>
+
+<ParamField body="capacity" type="integer">
+  Adjust the maximum number of attendees. Cannot be set below the current number of `tickets_sold`.
+</ParamField>
+
+<ParamField body="name" type="string">
+  Update the public event name.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Update the event description.
+</ParamField>
+
+<ParamField body="ticket_price" type="number">
+  Update the default ticket price. Does not affect tickets already sold.
+</ParamField>
+
+**Example — publishing a draft event:**
+
+```bash
+curl https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G \
+  -X PATCH \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "published"}'
+```
+
+**Example — increasing event capacity:**
+
+```bash
+curl https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G \
+  -X PATCH \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"capacity": 100}'
+```
+
+---
+
+## List Event Attendees
+
+Returns a paginated list of guests who have purchased tickets or been registered for the event.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the event.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+<ParamField query="per_page" type="integer">
+  Results per page. Defaults to `20`. Maximum is `100`.
+</ParamField>
+
+```bash
+curl "https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G/attendees?page=1&per_page=20" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "guest_id": "gst_01HT7QKZMB5A9TRCX9J",
+      "name": "Jordan Rivera",
+      "email": "jordan.rivera@example.com",
+      "ticket_type": "VIP Table",
+      "ticket_quantity": 2,
+      "checked_in": false,
+      "purchased_at": "2025-01-21T14:05:00Z"
+    },
+    {
+      "guest_id": "gst_01HT7QKZMB5A9TRCXAK",
+      "name": "Camille Fontaine",
+      "email": "camille.f@example.com",
+      "ticket_type": "General Admission",
+      "ticket_quantity": 1,
+      "checked_in": true,
+      "purchased_at": "2025-01-22T09:17:00Z"
+    }
+  ],
+  "meta": {
+    "total": 52,
+    "page": 1,
+    "per_page": 20
+  }
+}
+```

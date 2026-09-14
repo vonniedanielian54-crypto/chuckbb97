@@ -1,0 +1,102 @@
+---
+title: "Authenticate Requests to the KD LLC API"
+sidebarTitle: "Authentication"
+description: "Learn how to generate KD LLC API keys, pass them in request headers, and use test vs. live keys safely in your integration."
+---
+
+Every request to the KD LLC API must be authenticated with an API key. API keys identify your account, enforce rate limits, and control which resources your integration can access. KD LLC issues two types of keys — **live keys** for production and **test keys** for development — so you can build and validate your integration without ever touching real guest or reservation data.
+
+## Getting Your API Key
+
+API keys are managed from the KD LLC Dashboard:
+
+1. Log in to the [KD LLC Dashboard](https://dashboard.kdllc.com).
+2. Navigate to **Settings → API Keys**.
+3. Click **Create New Key**.
+4. Give the key a descriptive name (e.g., `my-app-production`), select the appropriate environment, and confirm.
+5. Copy your key immediately — it will only be shown once in full.
+
+## API Key Format
+
+Keys follow a consistent naming convention so you can identify their environment at a glance:
+
+| Environment | Prefix | Example |
+|-------------|--------|---------|
+| Live (production) | `kdllc_sk_live_` | `kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx` |
+| Test (sandbox) | `kdllc_sk_test_` | `kdllc_sk_test_xxxxxxxxxxxxxxxxxxxx` |
+
+## Authenticating Requests
+
+Pass your API key in the `Authorization` header of every request using the `Bearer` scheme:
+
+```
+Authorization: Bearer {api_key}
+```
+
+**Example — listing venues with a live key:**
+
+```bash
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+No additional session tokens or cookies are required. Every request is independently authenticated.
+
+## Test Keys vs. Live Keys
+
+| | Test Keys | Live Keys |
+|---|-----------|-----------|
+| **Environment** | Sandbox | Production |
+| **Data** | Synthetic, non-destructive | Real guest and reservation data |
+| **Charges** | Never processed | Processed as real transactions |
+| **Rate limits** | Same as your plan | Same as your plan |
+| **Use case** | Development and CI/CD | Customer-facing production traffic |
+
+Use test keys (`kdllc_sk_test_…`) during development and in automated test suites. Switch to your live key (`kdllc_sk_live_…`) only in your production environment.
+
+<Warning>
+**Never expose your API key in client-side code or public repositories.** API keys carry the full permissions of your account. If a key is committed to a public repo, embedded in a browser bundle, or otherwise leaked, rotate it immediately from **Dashboard → Settings → API Keys** and audit recent API activity. Use environment variables or a secrets manager to inject keys at runtime on your server.
+</Warning>
+
+## Authentication Errors
+
+If a request cannot be authenticated, the API returns one of the following errors:
+
+### 401 Unauthorized
+
+Returned when the `Authorization` header is missing or the API key is not recognized.
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "A valid API key must be provided in the Authorization header.",
+    "status": 401
+  }
+}
+```
+
+**Common causes:**
+- Forgetting to include the `Authorization: Bearer …` header entirely.
+- Passing a key that has been deleted or rotated.
+- Typos or truncation in the key value.
+
+### 403 Forbidden
+
+Returned when the API key is valid but does not have permission to access the requested resource.
+
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Your API key does not have permission to access this resource.",
+    "status": 403
+  }
+}
+```
+
+**Common causes:**
+- Attempting to access a venue or reservation that belongs to a different account.
+- Using a key with restricted scopes for an operation that requires broader permissions.
+
+If you consistently receive `403` errors, review the key's permission scopes in the Dashboard and confirm you are operating on resources that belong to your account.
