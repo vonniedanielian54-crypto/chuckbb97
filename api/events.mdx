@@ -1,5 +1,5 @@
 ---
-title: "REST API Endpoints for Events"
+title: "Events API — Create, Manage, and Track Attendees"
 sidebarTitle: "Events"
 description: "Create and manage venue events, control publishing status, sell tickets, and retrieve paginated attendee lists using the KD LLC Events API."
 ---
@@ -192,6 +192,10 @@ curl https://api.kdllc.com/v1/events \
 
 Retrieve the full details of a single event by its ID.
 
+<ParamField path="id" type="string" required>
+  The unique identifier of the event (e.g., `evt_01HS4NKZMB5A9TRCX2G`).
+</ParamField>
+
 ```bash
 curl https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G \
   -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
@@ -225,6 +229,10 @@ curl https://api.kdllc.com/v1/events/evt_01HS4NKZMB5A9TRCX2G \
 ## Update an Event
 
 Use `PATCH /events/{id}` to make partial updates to an event. Only the fields you provide will be changed. This endpoint is commonly used to publish a draft event or adjust capacity after creation.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the event to update.
+</ParamField>
 
 <ParamField body="status" type="string">
   Update the event's visibility. Pass `"published"` to make a draft event live, or `"cancelled"` to cancel it.

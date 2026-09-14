@@ -1,7 +1,7 @@
 ---
-title: "REST API Endpoints for Guests"
+title: "Guests API — Profiles, Preferences, and Booking History"
 sidebarTitle: "Guests"
-description: "Create and manage guest profiles with dietary preferences, VIP status, and full reservation history using the KD LLC Guests API."
+description: "Create and manage guest profiles with dietary preferences, VIP status, and full reservation history using the KD LLC Guests API endpoints."
 ---
 
 The Guests API lets you build rich, persistent profiles for the people who visit your venues. By storing preferences, dietary restrictions, contact details, and VIP status alongside a complete booking history, you can power personalized hospitality experiences — from greeting returning guests by name to proactively accommodating their needs before they arrive. Guest profiles are linked automatically to reservations and event tickets whenever a matching email address is used.
@@ -198,7 +198,7 @@ curl https://api.kdllc.com/v1/guests/gst_01HT7QKZMB5A9TRCX9J \
 
 ## Update a Guest Profile
 
-Replace the fields on an existing guest profile. Like the `POST /reservations` modify endpoint, only the fields you include will be changed.
+Replace the fields on an existing guest profile. Only the fields you include will be changed — all other fields remain as-is.
 
 <ParamField path="id" type="string" required>
   The unique identifier of the guest profile to update.

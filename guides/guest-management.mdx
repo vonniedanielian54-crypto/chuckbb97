@@ -1,5 +1,5 @@
 ---
-title: "Manage Your Guest List and Profiles"
+title: "Guest Management: Profiles, VIP Status, and History"
 sidebarTitle: "Guest Management"
 description: "Create and maintain rich guest profiles with preferences, VIP status, and reservation history to deliver a personalized hospitality experience."
 ---
@@ -14,13 +14,14 @@ Add a new guest to your KD LLC account by sending a `POST` request to `/guests`.
 
 ```bash
 curl -X POST "https://api.kdllc.com/v1/guests" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Jane Doe",
     "email": "jane.doe@example.com",
     "phone": "+1 (212) 555-0199",
     "dietary_restrictions": ["gluten-free", "no shellfish"],
+    "vip_status": false,
     "preferences": {
       "seating": "window booth",
       "music": "jazz",
@@ -50,11 +51,62 @@ curl -X POST "https://api.kdllc.com/v1/guests" \
 }
 ```
 
+<Tip>
+  Set `vip_status` to `true` at creation time to immediately flag a guest for elevated service across all your venues — no separate update needed.
+</Tip>
+
+---
+
+## Looking Up Guests
+
+Search for guests by email address, name, or phone number using query parameters on `GET /guests`. This is the fastest way to pull up a profile at check-in or when taking a new reservation.
+
+**Search by email:**
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests?email=jane.doe@example.com" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+**Example response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "guest_8d4c2f1a",
+      "name": "Jane Doe",
+      "email": "jane.doe@example.com",
+      "vip_status": true,
+      "visit_count": 14,
+      "dietary_restrictions": ["gluten-free", "no shellfish"],
+      "preferences": {
+        "seating": "window booth",
+        "music": "jazz",
+        "special_occasions": ["birthday", "anniversary"]
+      }
+    }
+  ],
+  "total": 1
+}
+```
+
+You can also search by `name` or `phone` using the same pattern:
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests?phone=%2B12125550199" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+<Note>
+  URL-encode special characters when passing query parameters. The `+` in phone numbers should be encoded as `%2B`.
+</Note>
+
 ---
 
 ## Full Guest Object Reference
 
-A complete guest record includes all profile fields, computed metrics, and a linked reservation history. Here is a representative example of a returning guest:
+A complete guest record includes all profile fields, computed metrics, and a linked reservation history. Here is a representative example of a returning VIP guest:
 
 ```json
 {
@@ -107,13 +159,72 @@ A complete guest record includes all profile fields, computed metrics, and a lin
 
 ---
 
-## Looking Up a Guest
+## Creating VIP Guests
 
-Search for a guest by email address using the `email` query parameter. This is the fastest way to pull up a profile at check-in or when taking a new reservation.
+To flag a guest as VIP from the moment they are added to your system, include `"vip_status": true` in your `POST /guests` request body. VIP status is account-wide — it applies across all venues in your KD LLC account.
 
 ```bash
-curl -X GET "https://api.kdllc.com/v1/guests?email=jane.doe@example.com" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl -X POST "https://api.kdllc.com/v1/guests" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Marcus Green",
+    "email": "marcus.green@example.com",
+    "phone": "+1 (212) 555-0374",
+    "vip_status": true,
+    "dietary_restrictions": ["vegan"],
+    "preferences": {
+      "seating": "corner booth",
+      "notes": "Prefers sparkling water. Regular guest — always books for business dinners."
+    }
+  }'
+```
+
+When `vip_status` is `true`, KD LLC surfaces the following behaviours automatically:
+
+- A **VIP badge** appears next to the guest's name in the reservation management dashboard.
+- Front-of-house staff receive a **VIP alert** in the check-in interface when the guest's reservation is upcoming.
+- VIP guests are eligible for **priority waitlist placement** when their preferred time slot is fully booked.
+
+---
+
+## Guest Preferences
+
+Capturing preferences at profile creation time means every team member can deliver a consistent, personalised experience without asking the guest to repeat themselves. The `preferences` object supports the following categories:
+
+<AccordionGroup>
+  <Accordion title="Dietary restrictions">
+    Store allergies and intolerances in the `dietary_restrictions` array. These automatically surface as alerts on the reservation detail view in your dashboard, ensuring kitchen and floor staff are always informed.
+
+    Example values: `"gluten-free"`, `"vegan"`, `"no shellfish"`, `"nut allergy"`, `"dairy-free"`
+  </Accordion>
+
+  <Accordion title="Seating preferences">
+    Record the guest's preferred seating location in `preferences.seating`. Staff can see this preference when assigning tables.
+
+    Example values: `"window booth"`, `"corner booth"`, `"bar seating"`, `"outdoor terrace"`, `"private dining room"`
+  </Accordion>
+
+  <Accordion title="Special occasions">
+    Recording upcoming birthdays or anniversaries in `preferences.special_occasions` lets you proactively offer celebration packages at the time of booking.
+
+    Example values: `"birthday"`, `"anniversary"`, `"graduation"`, `"corporate event"`
+  </Accordion>
+
+  <Accordion title="General notes">
+    Use `preferences.notes` for free-form details that don't fit other categories — for example, a favourite cocktail, preferred background music, or a note about the guest's business relationship.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Listing All Guests
+
+Retrieve your full guest list with a `GET` request to `/guests`. Results are paginated — use `page` and `per_page` to navigate large lists.
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests?page=1&per_page=20" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 **Example response:**
@@ -127,111 +238,27 @@ curl -X GET "https://api.kdllc.com/v1/guests?email=jane.doe@example.com" \
       "email": "jane.doe@example.com",
       "vip_status": true,
       "visit_count": 14
-    }
-  ],
-  "total": 1
-}
-```
-
-You can also search by `name` or `phone` using the same pattern: `GET /guests?phone=+12125550199`.
-
----
-
-## VIP Guests
-
-Mark a guest as VIP to flag them for elevated service and unlock special handling during the reservation flow. Set `vip_status` to `true` with a `PATCH` request:
-
-```bash
-curl -X PATCH "https://api.kdllc.com/v1/guests/guest_8d4c2f1a" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "vip_status": true
-  }'
-```
-
-When `vip_status` is `true`, KD LLC surfaces the following behaviours automatically:
-
-- A **VIP badge** appears next to the guest's name in the reservation management dashboard.
-- Front-of-house staff receive a **VIP alert** in the check-in interface when the guest's reservation is upcoming.
-- VIP guests are eligible for **priority waitlist placement** when their preferred time slot is fully booked.
-
-<Note>
-  VIP status is account-wide — it applies across all venues in your KD LLC account, not just the venue where the guest was first created.
-</Note>
-
----
-
-## Guest Preferences
-
-Keep preferences accurate so every team member can deliver a consistent, personalised experience without asking the guest to repeat themselves. Update any preference field at any time with `PATCH /guests/{id}`:
-
-```bash
-curl -X PATCH "https://api.kdllc.com/v1/guests/guest_8d4c2f1a" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "dietary_restrictions": ["gluten-free", "no shellfish", "dairy-free"],
-    "preferences": {
-      "seating": "corner booth",
-      "music": "jazz",
-      "special_occasions": ["birthday", "anniversary"],
-      "notes": "Prefers sparkling water over still. Favourite cocktail: Aperol Spritz."
-    }
-  }'
-```
-
-### Key Preference Categories
-
-- **Dietary restrictions** — Allergies and intolerances automatically surface as alerts on the reservation detail view in your dashboard.
-- **Seating preferences** — Window, booth, bar, outdoor terrace, and more. Staff can see the preference when assigning tables.
-- **Special occasions** — Recording upcoming birthdays or anniversaries lets you proactively offer celebration packages at the time of booking.
-
----
-
-## Viewing Reservation History
-
-Retrieve a guest's full reservation history with a `GET` request to `/guests/{id}/reservations`. Results are sorted by date descending.
-
-```bash
-curl -X GET "https://api.kdllc.com/v1/guests/guest_8d4c2f1a/reservations" \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-**Example response:**
-
-```json
-{
-  "guest_id": "guest_8d4c2f1a",
-  "total": 14,
-  "data": [
-    {
-      "reservation_id": "res_7c2e9d41",
-      "venue_id": "venue_4f8a2c1e",
-      "venue_name": "The Golden Plate",
-      "date": "2024-02-14",
-      "time": "20:00",
-      "party_size": 4,
-      "status": "completed",
-      "notes": "Anniversary dinner."
     },
     {
-      "reservation_id": "res_2b5f8a03",
-      "venue_id": "venue_4f8a2c1e",
-      "venue_name": "The Golden Plate",
-      "date": "2023-12-31",
-      "time": "21:00",
-      "party_size": 2,
-      "status": "completed",
-      "notes": "New Year's Eve — champagne toast requested."
+      "id": "guest_2c7b9e33",
+      "name": "Marcus Green",
+      "email": "marcus.green@example.com",
+      "vip_status": true,
+      "visit_count": 7
     }
   ],
+  "total": 142,
   "page": 1,
   "per_page": 20
 }
 ```
 
-Use the `status` query parameter to filter by reservation state: `GET /guests/{id}/reservations?status=upcoming` or `?status=completed`.
+To filter only VIP guests, add `vip_status=true`:
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/guests?vip_status=true" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
 
 ---
 

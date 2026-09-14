@@ -1,5 +1,5 @@
 ---
-title: "REST API Endpoints for Venues"
+title: "Venues API — List, Retrieve, and Check Availability"
 sidebarTitle: "Venues"
 description: "Browse, filter, and retrieve venue details using the KD LLC Venues API. Check real-time slot availability for any date and party size."
 ---
@@ -9,6 +9,8 @@ The Venues API gives you access to KD LLC's full catalog of dining, nightlife, a
 ---
 
 ## List Venues
+
+Retrieve a paginated list of venues. Use the query parameters below to filter results by location, type, or capacity.
 
 <ParamField query="city" type="string">
   Filter venues by city name (e.g., `"New York"`, `"Miami"`). Case-insensitive.

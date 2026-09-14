@@ -1,5 +1,5 @@
 ---
-title: "REST API Endpoints for Reservations"
+title: "Reservations API — Create, Retrieve, Modify, and Cancel"
 sidebarTitle: "Reservations"
 description: "Create, retrieve, modify, and cancel venue reservations with the KD LLC Reservations API. Manage the full booking lifecycle programmatically."
 ---
@@ -129,6 +129,10 @@ curl https://api.kdllc.com/v1/reservations/res_01HR2PKZMB5A9TRCX8F \
 ## Modify a Reservation
 
 Update the date, time, party size, or notes on an existing reservation. Only the fields you include in the request body will be changed — all other fields remain as-is. You cannot change the `venue_id` on an existing reservation; cancel and create a new one instead.
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the reservation to modify.
+</ParamField>
 
 <ParamField body="date" type="string">
   New reservation date in `YYYY-MM-DD` format.

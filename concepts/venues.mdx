@@ -1,7 +1,7 @@
 ---
-title: "Venues: Restaurants, Bars, Clubs & Event Spaces"
+title: "Venues: Dining, Nightlife & Event Spaces on KD LLC"
 sidebarTitle: "Venues"
-description: "Learn how venues work in KD LLC — from properties and availability to searching and filtering dining, nightlife, and event spaces."
+description: "Understand KD LLC venue objects — type, address, capacity, cuisine, hours, and amenities for restaurants, bars, lounges, and event spaces."
 ---
 
 Venues are the foundation of everything on KD LLC. Whether you're booking a table at a rooftop restaurant, reserving a private lounge for a birthday, or planning a night out at a members-only club, every experience starts with a venue. Understanding how venues are structured helps you discover the right space, check availability, and build seamless booking flows for your guests.
@@ -53,15 +53,98 @@ Every venue object contains a standard set of properties that describe its ident
   "cuisine": "Contemporary American",
   "hours": {
     "monday": "5pm-2am",
-    "tuesday": "5pm-2am"
+    "tuesday": "5pm-2am",
+    "wednesday": "5pm-2am",
+    "thursday": "5pm-2am",
+    "friday": "5pm-4am",
+    "saturday": "5pm-4am"
   },
-  "amenities": ["valet", "private_dining", "full_bar"]
+  "amenities": ["valet", "private_dining", "full_bar"],
+  "contact": {
+    "phone": "+12125550100",
+    "email": "reservations@thegrandlounge.com",
+    "website": "https://thegrandlounge.com"
+  }
 }
 ```
 
 <Note>
   Hours are returned as human-readable strings per day. Days not included in the `hours` object indicate the venue is closed on that day.
 </Note>
+
+## Fetching Venues
+
+Use the Venues API to list all available venues or retrieve a specific venue by its ID.
+
+### List All Venues
+
+Send a `GET` request to `/venues` to retrieve a paginated list of venues. You can narrow results using any of the supported query parameters described in the [Searching and Filtering](#searching-and-filtering-venues) section below.
+
+```bash
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "venue_abc123",
+      "name": "The Grand Lounge",
+      "type": "lounge",
+      "address": {
+        "street": "123 Fifth Avenue",
+        "city": "New York",
+        "state": "NY",
+        "zip": "10001"
+      },
+      "capacity": 200,
+      "cuisine": "Contemporary American"
+    }
+  ],
+  "has_more": true,
+  "next_cursor": "cursor_def456"
+}
+```
+
+### Get a Single Venue
+
+Retrieve full details for a specific venue by its `id`.
+
+```bash
+curl https://api.kdllc.com/v1/venues/venue_abc123 \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "id": "venue_abc123",
+  "name": "The Grand Lounge",
+  "type": "lounge",
+  "address": {
+    "street": "123 Fifth Avenue",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10001"
+  },
+  "capacity": 200,
+  "cuisine": "Contemporary American",
+  "hours": {
+    "monday": "5pm-2am",
+    "tuesday": "5pm-2am",
+    "wednesday": "5pm-2am",
+    "thursday": "5pm-2am",
+    "friday": "5pm-4am",
+    "saturday": "5pm-4am"
+  },
+  "amenities": ["valet", "private_dining", "full_bar"],
+  "contact": {
+    "phone": "+12125550100",
+    "email": "reservations@thegrandlounge.com",
+    "website": "https://thegrandlounge.com"
+  }
+}
+```
 
 ## Venue Availability
 
@@ -84,7 +167,7 @@ The platform returns a list of confirmed open time slots ranked by match quality
 
 KD LLC lets you search across all listed venues using a flexible set of filters. Combine filters to surface the most relevant spaces for your guests.
 
-**Supported filters:**
+**Supported query parameters:**
 
 - **`type`** — Filter by venue category (`restaurant`, `bar`, `lounge`, `club`, `event-space`)
 - **`city`** — Limit results to a specific city
@@ -92,6 +175,11 @@ KD LLC lets you search across all listed venues using a flexible set of filters.
 - **`cuisine`** — Match by cuisine style (e.g., `"Italian"`, `"Contemporary American"`)
 - **`amenities`** — Require specific amenities such as `"valet"` or `"private_dining"`
 - **`date` + `party_size`** — Return only venues with availability on a given date
+
+```bash
+curl "https://api.kdllc.com/v1/venues?type=restaurant&city=New+York&cuisine=Italian" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
 
 <Warning>
   Venue listings, hours, and amenities can change. Always fetch fresh venue data before presenting details to a guest rather than relying on cached results.

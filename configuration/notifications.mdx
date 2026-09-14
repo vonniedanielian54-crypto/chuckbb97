@@ -1,5 +1,5 @@
 ---
-title: "Set Up Notifications and Reminders"
+title: "Configure Notifications and Delivery Alerts in KD LLC"
 sidebarTitle: "Notifications"
 description: "Configure email, SMS, push, and webhook notifications to keep guests and operators informed at every step of the reservation lifecycle."
 ---
@@ -36,11 +36,20 @@ Toggle email delivery on or off for each of the following events:
 
 Operators can customize the content of confirmation and reminder emails to reflect their venue's branding:
 
-1. Navigate to **Settings → Notifications → Email → Templates**.
-2. Select the template you want to edit (for example, **Reservation Confirmed**).
-3. Update the subject line, header image, and body copy using the visual editor.
-4. Click **Preview** to see a rendered sample before saving.
-5. Click **Save Template** to apply the changes to all future emails.
+<Steps>
+  <Step title="Open Email Templates">
+    Navigate to **Settings → Notifications → Email → Templates**.
+  </Step>
+  <Step title="Select a template">
+    Choose the template you want to edit (for example, **Reservation Confirmed**).
+  </Step>
+  <Step title="Edit the content">
+    Update the subject line, header image, and body copy using the visual editor.
+  </Step>
+  <Step title="Preview and save">
+    Click **Preview** to review a rendered sample, then click **Save Template** to apply the changes to all future emails.
+  </Step>
+</Steps>
 
 <Tip>
 Include your venue's cancellation policy and a direct link to the reservation management page in your confirmation email template to reduce inbound support requests.
@@ -52,10 +61,14 @@ SMS notifications deliver short, time-sensitive messages directly to a guest's o
 
 ### Enabling SMS
 
-1. Navigate to **Settings → Notifications → SMS**.
-2. Toggle **Enable SMS Notifications** on.
-3. If you have not yet verified a phone number, you are prompted to enter one and receive a 6-digit verification code.
-4. Enter the code to complete verification.
+<Steps>
+  <Step title="Open SMS settings">
+    Navigate to **Settings → Notifications → SMS** and toggle **Enable SMS Notifications** on.
+  </Step>
+  <Step title="Verify your phone number">
+    If you have not yet verified a phone number, enter one when prompted and enter the 6-digit verification code you receive to complete verification.
+  </Step>
+</Steps>
 
 <Note>
 Standard carrier messaging rates may apply to guests who receive SMS notifications. KD LLC does not charge separately for outbound SMS within supported regions.
@@ -78,11 +91,20 @@ KD LLC supports two configurable reminder windows. Both can be enabled simultane
 
 To adjust when reminders are sent:
 
-1. Go to **Settings → Notifications → Reminders**.
-2. Find the reminder you want to configure (**24-Hour** or **2-Hour**).
-3. Use the **Offset** dropdown to change the lead time (available options: 1 h, 2 h, 4 h, 6 h, 12 h, 24 h, 48 h).
-4. Toggle the channels (Email, SMS, Push) you want to use for each reminder.
-5. Click **Save**.
+<Steps>
+  <Step title="Open Reminders settings">
+    Go to **Settings → Notifications → Reminders**.
+  </Step>
+  <Step title="Choose a reminder">
+    Find the reminder you want to configure (**24-Hour** or **2-Hour**).
+  </Step>
+  <Step title="Set the offset">
+    Use the **Offset** dropdown to change the lead time. Available options: 1 h, 2 h, 4 h, 6 h, 12 h, 24 h, 48 h.
+  </Step>
+  <Step title="Select channels and save">
+    Toggle the channels (Email, SMS, Push) you want to use for each reminder, then click **Save**.
+  </Step>
+</Steps>
 
 <Note>
 If a reservation is created less than 24 hours before the reservation time, the 24-hour reminder is skipped automatically and only the 2-hour reminder fires (if applicable).
@@ -90,15 +112,24 @@ If a reservation is created less than 24 hours before the reservation time, the 
 
 ## Webhook Notifications
 
-Webhooks allow KD LLC to push real-time event data to your own server via HTTP POST requests. This is useful for custom integrations, internal dashboards, or any downstream system that needs to react to reservation changes programmatically.
+Webhooks allow KD LLC to push real-time event data to your server via HTTP POST requests. This is useful for custom integrations, automated dashboards, or any downstream system that needs to react to reservation changes programmatically.
 
 ### Setting Your Webhook URL
 
-1. Navigate to **Settings → Notifications → Webhooks**.
-2. Click **Add Endpoint**.
-3. Enter the publicly accessible HTTPS URL that will receive the payloads.
-4. Select the event types you want to subscribe to (see below).
-5. Click **Save Endpoint**.
+<Steps>
+  <Step title="Open Webhooks settings">
+    Navigate to **Settings → Notifications → Webhooks** and click **Add Endpoint**.
+  </Step>
+  <Step title="Enter your endpoint URL">
+    Enter the publicly accessible HTTPS URL that will receive the payloads.
+  </Step>
+  <Step title="Select event types">
+    Choose the event types you want to subscribe to (see the table below).
+  </Step>
+  <Step title="Save the endpoint">
+    Click **Save Endpoint** to activate delivery.
+  </Step>
+</Steps>
 
 ### Subscribable Event Types
 
@@ -133,8 +164,10 @@ All payloads follow this envelope structure: a top-level `event` string, an ISO 
 
 ### Verifying Webhook Signatures
 
-<Note>
 Every webhook request from KD LLC includes an `X-KD-Signature` header containing an HMAC-SHA256 signature of the raw request body, signed with your endpoint's secret key. Always verify this signature before processing the payload to ensure the request genuinely originated from KD LLC and was not tampered with in transit. Your endpoint secret is displayed once when you create the webhook endpoint — store it securely.
-</Note>
 
 To verify the signature, compute `HMAC-SHA256(raw_body, your_secret)` and compare it to the value in `X-KD-Signature`. Reject any request where the values do not match.
+
+<Warning>
+Do not parse or modify the request body before computing the HMAC signature. Any transformation — including JSON pretty-printing or whitespace normalization — changes the byte sequence and causes every signature check to fail.
+</Warning>

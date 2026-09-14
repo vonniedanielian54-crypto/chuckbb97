@@ -1,7 +1,7 @@
 ---
-title: "Configure Your KD LLC Account Settings"
+title: "Manage Your KD LLC Account, Venue, and API Settings"
 sidebarTitle: "Settings"
-description: "Manage your profile, venue configuration, API keys, and account preferences from one central place in KD LLC."
+description: "Control your profile, configure venue booking rules, generate and rotate API keys, and manage all account-level preferences in KD LLC."
 ---
 
 Your KD LLC account settings give you full control over how your profile appears, how your venue operates, and how external systems connect to your data. Whether you're a guest managing personal preferences or an operator fine-tuning reservation rules, all configuration lives under **Settings** in your dashboard sidebar.
@@ -62,20 +62,36 @@ API keys allow external applications, scripts, and integrations to authenticate 
 
 ### Generating a Key
 
-1. Click **New API Key**.
-2. Enter a descriptive label (for example, `pos-integration` or `zapier-automation`).
-3. Select the permission scopes the key requires.
-4. Click **Create Key**.
-5. Copy the key immediately — KD LLC displays it only once.
+<Steps>
+  <Step title="Open API Keys">
+    Navigate to **Settings → API Keys** and click **New API Key**.
+  </Step>
+  <Step title="Name your key">
+    Enter a descriptive label (for example, `pos-integration` or `zapier-automation`) so you can identify it later.
+  </Step>
+  <Step title="Set permission scopes">
+    Select the permission scopes the key requires. Grant only the access your integration needs.
+  </Step>
+  <Step title="Create and copy">
+    Click **Create Key** and copy the key immediately — KD LLC displays it only once.
+  </Step>
+</Steps>
 
 ### Rotating a Key
 
 Rotate a key when you suspect it has been exposed or as part of a regular security audit:
 
-1. Locate the key you want to rotate in the key list.
-2. Click **Rotate** next to that key.
-3. Confirm the action in the dialog.
-4. Update all systems using the old key with the newly generated value before the rotation grace period expires.
+<Steps>
+  <Step title="Locate the key">
+    Navigate to **Settings → API Keys** and find the key you want to rotate.
+  </Step>
+  <Step title="Initiate rotation">
+    Click **Rotate** next to that key and confirm the action in the dialog.
+  </Step>
+  <Step title="Update your systems">
+    Update all systems that use the old key with the newly generated value before the rotation grace period expires.
+  </Step>
+</Steps>
 
 <Warning>
 The old key remains valid for 24 hours after rotation to give you time to update dependent systems. After that window, the old key is permanently invalidated.
@@ -95,10 +111,17 @@ Deleting your account permanently removes your profile, reservation history, sav
 
 To delete your account:
 
-1. Scroll to **Settings → Account → Danger Zone**.
-2. Click **Delete Account**.
-3. Type your email address to confirm your intent.
-4. Click **Permanently Delete**.
+<Steps>
+  <Step title="Open Danger Zone">
+    Scroll to **Settings → Account → Danger Zone** and click **Delete Account**.
+  </Step>
+  <Step title="Confirm your intent">
+    Type your email address in the confirmation field to proceed.
+  </Step>
+  <Step title="Permanently delete">
+    Click **Permanently Delete** to complete the process.
+  </Step>
+</Steps>
 
 <Warning>
 If you operate a venue, you must transfer or close all active reservations and remove your venue listing before you can delete your account. Accounts with pending payouts are ineligible for deletion until all balances are settled.

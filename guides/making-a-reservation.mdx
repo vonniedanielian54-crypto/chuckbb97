@@ -1,7 +1,7 @@
 ---
-title: "How to Make a Reservation with KD LLC"
+title: "How to Create and Manage Reservations with KD LLC"
 sidebarTitle: "Make a Reservation"
-description: "Learn how to search venues, check availability, and book a confirmed reservation through the KD LLC API in just a few steps."
+description: "Learn how to search venues, retrieve venue details, and book a confirmed reservation through the KD LLC API — then modify or cancel as needed."
 ---
 
 This guide walks you through the full reservation flow on KD LLC — from discovering the right venue and confirming open time slots to submitting your booking and receiving a confirmation. By the end, you will have a confirmed reservation and understand how to modify or cancel it if your plans change.
@@ -23,126 +23,133 @@ Include your API key as a `Bearer` token in the `Authorization` header of every 
   <Step title="Search for a Venue">
     Start by querying the `/venues` endpoint to find venues that match your city and type. Use the `city` and `type` query parameters to narrow your results.
 
-    ```bash
-    curl -X GET "https://api.kdllc.com/v1/venues?city=New+York&type=restaurant" \
-      -H "Authorization: Bearer YOUR_API_KEY" \
-      -H "Content-Type: application/json"
-    ```
+```bash
+curl -X GET "https://api.kdllc.com/v1/venues?city=New+York&type=restaurant" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json"
+```
 
     **Example response:**
 
-    ```json
+```json
+{
+  "data": [
     {
-      "data": [
-        {
-          "id": "venue_4f8a2c1e",
-          "name": "The Golden Plate",
-          "type": "restaurant",
-          "city": "New York",
-          "address": "142 West 54th Street, New York, NY 10019",
-          "cuisine": "Contemporary American",
-          "rating": 4.8,
-          "capacity": 120,
-          "phone": "+1 (212) 555-0182",
-          "website": "https://www.thegoldenplate.com"
-        },
-        {
-          "id": "venue_9b3d7f22",
-          "name": "Maison Lumière",
-          "type": "restaurant",
-          "city": "New York",
-          "address": "88 Park Avenue, New York, NY 10016",
-          "cuisine": "French Bistro",
-          "rating": 4.6,
-          "capacity": 80,
-          "phone": "+1 (212) 555-0374",
-          "website": "https://www.maisonlumiere.com"
-        }
-      ],
-      "total": 2,
-      "page": 1,
-      "per_page": 20
+      "id": "venue_4f8a2c1e",
+      "name": "The Golden Plate",
+      "type": "restaurant",
+      "city": "New York",
+      "address": "142 West 54th Street, New York, NY 10019",
+      "cuisine": "Contemporary American",
+      "rating": 4.8,
+      "capacity": 120,
+      "phone": "+1 (212) 555-0182",
+      "website": "https://www.thegoldenplate.com"
+    },
+    {
+      "id": "venue_9b3d7f22",
+      "name": "Maison Lumière",
+      "type": "restaurant",
+      "city": "New York",
+      "address": "88 Park Avenue, New York, NY 10016",
+      "cuisine": "French Bistro",
+      "rating": 4.6,
+      "capacity": 80,
+      "phone": "+1 (212) 555-0374",
+      "website": "https://www.maisonlumiere.com"
     }
-    ```
+  ],
+  "total": 2,
+  "page": 1,
+  "per_page": 20
+}
+```
 
     Note the `id` of the venue you want to book — you will use it in the next step.
   </Step>
 
-  <Step title="Check Availability">
-    Before creating a reservation, verify that your preferred date and party size are available. Pass the venue's `id`, your desired `date` (in `YYYY-MM-DD` format), and `party_size` as query parameters.
+  <Step title="Retrieve Venue Details">
+    Before creating a reservation, fetch the full profile for your chosen venue using `GET /venues/{id}`. This gives you the venue's current capacity, contact information, cancellation policy, and timezone — all of which are useful when selecting a time and party size.
 
-    ```bash
-    curl -X GET "https://api.kdllc.com/v1/venues/venue_4f8a2c1e/availability?date=2024-02-14&party_size=4" \
-      -H "Authorization: Bearer YOUR_API_KEY" \
-      -H "Content-Type: application/json"
-    ```
+```bash
+curl -X GET "https://api.kdllc.com/v1/venues/venue_4f8a2c1e" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json"
+```
 
     **Example response:**
 
-    ```json
-    {
-      "venue_id": "venue_4f8a2c1e",
-      "date": "2024-02-14",
-      "party_size": 4,
-      "available_slots": [
-        { "time": "17:00", "available": true },
-        { "time": "17:30", "available": true },
-        { "time": "18:00", "available": false },
-        { "time": "18:30", "available": true },
-        { "time": "19:00", "available": false },
-        { "time": "19:30", "available": true },
-        { "time": "20:00", "available": true },
-        { "time": "20:30", "available": true },
-        { "time": "21:00", "available": true }
-      ]
-    }
-    ```
+```json
+{
+  "id": "venue_4f8a2c1e",
+  "name": "The Golden Plate",
+  "type": "restaurant",
+  "city": "New York",
+  "address": "142 West 54th Street, New York, NY 10019",
+  "cuisine": "Contemporary American",
+  "rating": 4.8,
+  "capacity": 120,
+  "timezone": "America/New_York",
+  "cancellation_policy": "Free cancellation up to 24 hours before the reservation. Cancellations within 24 hours may incur a fee.",
+  "phone": "+1 (212) 555-0182",
+  "website": "https://www.thegoldenplate.com",
+  "hours": {
+    "monday": "17:00–22:00",
+    "tuesday": "17:00–22:00",
+    "wednesday": "17:00–22:00",
+    "thursday": "17:00–22:00",
+    "friday": "17:00–23:00",
+    "saturday": "16:00–23:00",
+    "sunday": "16:00–21:00"
+  }
+}
+```
 
-    Choose a time slot where `"available": true` and record it for the next step.
+    Review the `cancellation_policy` and `hours` before proceeding so you can choose a time that works within the venue's operating schedule.
 
     <Tip>
-      Dates and times are returned in the venue's local timezone. Check the venue's `timezone` field on its full profile (`GET /venues/{id}`) if you need to convert to UTC.
+      All times are in the venue's local timezone, indicated by the `timezone` field. Convert to UTC if your application stores times universally.
     </Tip>
   </Step>
 
   <Step title="Create the Reservation">
     Submit a `POST` request to `/reservations` with the venue, date, time, party size, and guest details. All fields in the example below are required unless noted as optional.
 
-    ```bash
-    curl -X POST "https://api.kdllc.com/v1/reservations" \
-      -H "Authorization: Bearer YOUR_API_KEY" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "venue_id": "venue_4f8a2c1e",
-        "date": "2024-02-14",
-        "time": "20:00",
-        "party_size": 4,
-        "guest_name": "Jane Doe",
-        "guest_email": "jane.doe@example.com",
-        "guest_phone": "+1 (212) 555-0199",
-        "notes": "Anniversary dinner — please prepare a small dessert surprise."
-      }'
-    ```
+```bash
+curl -X POST "https://api.kdllc.com/v1/reservations" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "venue_id": "venue_4f8a2c1e",
+    "date": "2024-02-14",
+    "time": "20:00",
+    "party_size": 4,
+    "guest_name": "Jane Doe",
+    "guest_email": "jane.doe@example.com",
+    "guest_phone": "+1 (212) 555-0199",
+    "notes": "Anniversary dinner — please prepare a small dessert surprise."
+  }'
+```
 
     **Example confirmation response:**
 
-    ```json
-    {
-      "id": "res_7c2e9d41",
-      "status": "confirmed",
-      "venue_id": "venue_4f8a2c1e",
-      "venue_name": "The Golden Plate",
-      "date": "2024-02-14",
-      "time": "20:00",
-      "party_size": 4,
-      "guest_name": "Jane Doe",
-      "guest_email": "jane.doe@example.com",
-      "guest_phone": "+1 (212) 555-0199",
-      "notes": "Anniversary dinner — please prepare a small dessert surprise.",
-      "confirmation_code": "KDLLC-20240214-7C2E",
-      "created_at": "2024-01-30T14:22:08Z"
-    }
-    ```
+```json
+{
+  "id": "res_7c2e9d41",
+  "status": "confirmed",
+  "venue_id": "venue_4f8a2c1e",
+  "venue_name": "The Golden Plate",
+  "date": "2024-02-14",
+  "time": "20:00",
+  "party_size": 4,
+  "guest_name": "Jane Doe",
+  "guest_email": "jane.doe@example.com",
+  "guest_phone": "+1 (212) 555-0199",
+  "notes": "Anniversary dinner — please prepare a small dessert surprise.",
+  "confirmation_code": "KDLLC-20240214-7C2E",
+  "created_at": "2024-01-30T14:22:08Z"
+}
+```
 
     Store the `id` and `confirmation_code` — you will need them to manage the reservation later.
   </Step>
@@ -153,14 +160,14 @@ Include your API key as a `Bearer` token in the `Authorization` header of every 
     - **Confirmation email** — Sent to the `guest_email` address you provided. It includes the reservation date, time, venue address, party size, and the unique `confirmation_code`.
     - **Webhook notification** — If you have registered a webhook endpoint in your KD LLC dashboard, a `reservation.confirmed` event payload is dispatched immediately to your endpoint.
 
-    ```json
-    {
-      "event": "reservation.confirmed",
-      "reservation_id": "res_7c2e9d41",
-      "confirmation_code": "KDLLC-20240214-7C2E",
-      "timestamp": "2024-01-30T14:22:09Z"
-    }
-    ```
+```json
+{
+  "event": "reservation.confirmed",
+  "reservation_id": "res_7c2e9d41",
+  "confirmation_code": "KDLLC-20240214-7C2E",
+  "timestamp": "2024-01-30T14:22:09Z"
+}
+```
 
     <Note>
       To configure webhook endpoints, go to **Settings → Webhooks** in your KD LLC dashboard and add your endpoint URL.
@@ -172,17 +179,31 @@ Include your API key as a `Bearer` token in the `Authorization` header of every 
 
 ## Managing Your Reservation
 
+### Retrieve a Reservation
+
+To look up an existing reservation by its ID, send a `GET` request:
+
+```bash
+curl -X GET "https://api.kdllc.com/v1/reservations/res_7c2e9d41" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
 ### Modify a Reservation
 
-To change the date, time, party size, or notes on an existing reservation, send a `PUT` request with the updated fields. Only include the fields you want to change.
+To change the date, time, party size, or notes on an existing reservation, send a `PUT` request with the full updated reservation body. Include all required fields, even those you are not changing.
 
 ```bash
 curl -X PUT "https://api.kdllc.com/v1/reservations/res_7c2e9d41" \
-  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
   -H "Content-Type: application/json" \
   -d '{
+    "venue_id": "venue_4f8a2c1e",
+    "date": "2024-02-14",
     "time": "19:30",
     "party_size": 6,
+    "guest_name": "Jane Doe",
+    "guest_email": "jane.doe@example.com",
+    "guest_phone": "+1 (212) 555-0199",
     "notes": "Anniversary dinner — party grew to 6. Please arrange a round table."
   }'
 ```
@@ -195,7 +216,7 @@ To cancel, send a `DELETE` request with the reservation `id`. The guest receives
 
 ```bash
 curl -X DELETE "https://api.kdllc.com/v1/reservations/res_7c2e9d41" \
-  -H "Authorization: Bearer YOUR_API_KEY"
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 **Example response:**
@@ -209,7 +230,7 @@ curl -X DELETE "https://api.kdllc.com/v1/reservations/res_7c2e9d41" \
 ```
 
 <Warning>
-  Cancellation policies vary by venue. Some venues enforce a no-cancellation window (e.g., within 24 hours of the reservation). Check the venue's `cancellation_policy` field before cancelling to avoid fees.
+  Cancellation policies vary by venue. Some venues enforce a no-cancellation window (for example, within 24 hours of the reservation). Check the venue's `cancellation_policy` field before cancelling to avoid fees.
 </Warning>
 
 ---

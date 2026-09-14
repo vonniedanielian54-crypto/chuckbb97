@@ -1,7 +1,7 @@
 ---
-title: "Authenticate Requests to the KD LLC API"
+title: "API Authentication — Keys, Headers, and Environments"
 sidebarTitle: "Authentication"
-description: "Learn how to generate KD LLC API keys, pass them in request headers, and use test vs. live keys safely in your integration."
+description: "Learn how to generate KD LLC API keys, pass them in request headers, and safely use test vs. live keys throughout your integration."
 ---
 
 Every request to the KD LLC API must be authenticated with an API key. API keys identify your account, enforce rate limits, and control which resources your integration can access. KD LLC issues two types of keys — **live keys** for production and **test keys** for development — so you can build and validate your integration without ever touching real guest or reservation data.
@@ -10,11 +10,20 @@ Every request to the KD LLC API must be authenticated with an API key. API keys 
 
 API keys are managed from the KD LLC Dashboard:
 
-1. Log in to the [KD LLC Dashboard](https://dashboard.kdllc.com).
-2. Navigate to **Settings → API Keys**.
-3. Click **Create New Key**.
-4. Give the key a descriptive name (e.g., `my-app-production`), select the appropriate environment, and confirm.
-5. Copy your key immediately — it will only be shown once in full.
+<Steps>
+  <Step title="Log in to the Dashboard">
+    Visit [dashboard.kdllc.com](https://dashboard.kdllc.com) and sign in to your account.
+  </Step>
+  <Step title="Open API Keys settings">
+    Navigate to **Settings → API Keys** from the sidebar.
+  </Step>
+  <Step title="Create a new key">
+    Click **Create New Key**, give it a descriptive name (e.g., `my-app-production`), and select the appropriate environment.
+  </Step>
+  <Step title="Copy your key">
+    Copy your key immediately — it will only be shown once in full. Store it securely in your environment configuration.
+  </Step>
+</Steps>
 
 ## API Key Format
 
@@ -29,7 +38,7 @@ Keys follow a consistent naming convention so you can identify their environment
 
 Pass your API key in the `Authorization` header of every request using the `Bearer` scheme:
 
-```
+```http
 Authorization: Bearer {api_key}
 ```
 
@@ -50,7 +59,7 @@ No additional session tokens or cookies are required. Every request is independe
 | **Data** | Synthetic, non-destructive | Real guest and reservation data |
 | **Charges** | Never processed | Processed as real transactions |
 | **Rate limits** | Same as your plan | Same as your plan |
-| **Use case** | Development and CI/CD | Customer-facing production traffic |
+| **Use case** | Development and automated testing | Customer-facing production traffic |
 
 Use test keys (`kdllc_sk_test_…`) during development and in automated test suites. Switch to your live key (`kdllc_sk_live_…`) only in your production environment.
 

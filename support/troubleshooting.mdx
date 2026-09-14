@@ -1,5 +1,5 @@
 ---
-title: "Troubleshoot Common KD LLC Issues"
+title: "Troubleshoot Common Issues with the KD LLC Platform"
 sidebarTitle: "Troubleshooting"
 description: "Step-by-step guidance for resolving API errors, reservation problems, webhook failures, notification issues, and other common KD LLC issues."
 ---
@@ -15,29 +15,32 @@ A `401 Unauthorized` response means the server could not authenticate your reque
 
 **1. Confirm the Authorization header format**
 
-Your request must include the API key using a `Bearer` token in the `Authorization` header:
+Your request must include the API key as a `Bearer` token in the `Authorization` header:
 
-```http
-Authorization: Bearer YOUR_API_KEY
+```bash
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 A common mistake is omitting the `Bearer` prefix or adding extra spaces:
 
-```http
+```bash
 # Incorrect — missing Bearer prefix
-Authorization: YOUR_API_KEY
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 
 # Incorrect — extra space after colon
-Authorization:  Bearer YOUR_API_KEY
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization:  Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 **2. Confirm the key has not been revoked**
 
 Navigate to **Settings → API Keys** and verify the key you are using is listed and shows an **Active** status. If it shows **Revoked**, generate a new key and update your integration.
 
-**3. Confirm you are using the correct key**
+**3. Confirm you are using the correct key type**
 
-If you have multiple keys, make sure the key in your request matches the one configured for that environment. It is easy to accidentally use a staging key against the production API or vice versa.
+Live keys (`kdllc_sk_live_...`) authenticate against `https://api.kdllc.com/v1`. Test keys (`kdllc_sk_test_...`) are for development use and cannot be mixed with live-environment requests.
 
 **4. Check for whitespace or encoding errors**
 
@@ -86,7 +89,7 @@ If your webhook URL is configured but events are not arriving, work through the 
 
 **1. Verify the URL is publicly accessible**
 
-Your webhook endpoint must be reachable from the public internet over HTTPS. KD LLC cannot deliver events to `localhost`, private IP addresses, or URLs behind a VPN or firewall. Use a tool like [webhook.site](https://webhook.site) to confirm KD LLC can reach an external endpoint before troubleshooting your own server.
+Your webhook endpoint must be reachable from the public internet over HTTPS. KD LLC cannot deliver events to `localhost`, private IP addresses, or URLs behind a firewall. Use a tool like [webhook.site](https://webhook.site) to confirm KD LLC can reach an external endpoint before troubleshooting your own server.
 
 **2. Check the endpoint's response code**
 
@@ -120,13 +123,9 @@ If you are searching by map or neighborhood, zoom out or switch to a broader cit
 
 Type the full venue name into the search bar. Some venues are listed under a slightly different trade name than their common public name.
 
-**4. Check regional availability**
+**4. The venue may not yet be listed**
 
-KD LLC currently operates in select metropolitan areas. If the venue is located in a region where KD LLC is not yet active, it will not appear in results. Check the [Supported Cities](/) page for the current coverage map.
-
-**5. The venue may not yet be listed**
-
-If you are a guest looking for a specific venue, you can request it be added by clicking **Suggest a Venue** at the bottom of the search results page.
+KD LLC operates in select metropolitan areas. If the venue is in a region not yet covered, it will not appear in results. If you are a guest looking for a specific venue, you can request it be added by clicking **Suggest a Venue** at the bottom of the search results page.
 </Accordion>
 
 <Accordion title="Email notifications are not arriving">
@@ -168,7 +167,7 @@ Use this table to quickly identify what an API error code means and how to resol
 | `409` | Conflict | The request conflicts with existing data (for example, a duplicate reservation at the same time) | Check for an existing record before creating; resolve the conflict and retry |
 | `422` | Unprocessable Entity | The request is structurally valid but fails business-logic validation (for example, party size exceeds venue maximum) | Read the `errors` array in the response body for field-level detail |
 | `429` | Too Many Requests | The rate limit for your plan has been exceeded | Wait for the `Retry-After` duration and retry with exponential backoff |
-| `500` | Internal Server Error | An unexpected error occurred on the KD LLC server | Retry after a brief wait; if the error persists, contact support with the request ID from the response |
+| `500` | Internal Server Error | An unexpected error occurred on the KD LLC servers | Retry after a brief wait; if the error persists, contact support with the request ID from the response |
 
 ## Contact Support
 

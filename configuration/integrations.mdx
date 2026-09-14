@@ -1,5 +1,5 @@
 ---
-title: "Connect KD LLC with External Services"
+title: "Connect KD LLC to Your Existing Tools and Services"
 sidebarTitle: "Integrations"
 description: "Sync reservations with your calendar, connect your POS system, link your CRM, and automate workflows using Zapier, Make, or custom webhooks."
 ---
@@ -35,16 +35,27 @@ Connecting a calendar integration ensures that every confirmed reservation and p
 | **Apple Calendar** | KD LLC → Apple | Uses iCal feed subscription; refreshes every 15 minutes |
 | **Microsoft Outlook** | KD LLC → Outlook | OAuth 2.0 via Microsoft 365; supports shared calendars |
 
-### Setting Up Google Calendar (Step-by-Step)
+### Setting Up Google Calendar
 
-1. Open **Settings → Integrations** in your KD LLC dashboard.
-2. Locate the **Google Calendar** card and click **Connect**.
-3. You are redirected to Google's authorization page. Sign in with the Google account that owns the calendar you want to sync to.
-4. Grant KD LLC permission to create and manage calendar events on your behalf.
-5. After authorization, you are returned to KD LLC. Select the target calendar from the dropdown (for example, a dedicated **KD LLC Reservations** calendar).
-6. Click **Save** to activate the sync.
+<Steps>
+  <Step title="Open Integrations">
+    Navigate to **Settings → Integrations** in your KD LLC dashboard and locate the **Google Calendar** card.
+  </Step>
+  <Step title="Connect your Google account">
+    Click **Connect**. You are redirected to Google's authorization page. Sign in with the Google account that owns the calendar you want to sync to.
+  </Step>
+  <Step title="Grant permissions">
+    Grant KD LLC permission to create and manage calendar events on your behalf.
+  </Step>
+  <Step title="Select target calendar">
+    After authorization, you are returned to KD LLC. Choose the target calendar from the dropdown (for example, a dedicated **KD LLC Reservations** calendar).
+  </Step>
+  <Step title="Activate sync">
+    Click **Save** to activate the sync. New confirmed reservations will appear in your Google Calendar within seconds.
+  </Step>
+</Steps>
 
-New confirmed reservations will appear in your Google Calendar within seconds. Cancellations and modifications are reflected automatically.
+Cancellations and modifications are reflected in your calendar automatically.
 
 <Note>
 To disconnect Google Calendar at any time, return to **Settings → Integrations → Google Calendar** and click **Disconnect**. Existing calendar events created by KD LLC are not deleted from Google Calendar when you disconnect.
@@ -74,19 +85,43 @@ CRM integrations push guest profile data and reservation history into your custo
 
 ### Salesforce
 
-1. Navigate to **Settings → Integrations → Salesforce**.
-2. Click **Connect to Salesforce** and authorize KD LLC via OAuth.
-3. Map KD LLC guest fields to Salesforce Contact fields using the field-mapping table.
-4. Choose whether to sync all guests or only guests with at least one confirmed reservation.
-5. Click **Enable Sync**.
+<Steps>
+  <Step title="Open the Salesforce integration">
+    Navigate to **Settings → Integrations → Salesforce** and click **Connect to Salesforce**.
+  </Step>
+  <Step title="Authorize via OAuth">
+    Sign in to Salesforce and grant KD LLC the requested permissions.
+  </Step>
+  <Step title="Map fields">
+    Use the field-mapping table to align KD LLC guest fields with Salesforce Contact fields.
+  </Step>
+  <Step title="Choose sync scope">
+    Select whether to sync all guests or only guests with at least one confirmed reservation.
+  </Step>
+  <Step title="Enable sync">
+    Click **Enable Sync** to activate the integration.
+  </Step>
+</Steps>
 
 ### HubSpot
 
-1. Navigate to **Settings → Integrations → HubSpot**.
-2. Click **Connect to HubSpot** and authorize the integration.
-3. Configure which KD LLC events (reservation confirmed, cancellation, repeat visit) create or update HubSpot Contact records.
-4. Optionally enable **Deal Creation** to log high-value reservations as HubSpot Deals.
-5. Click **Save**.
+<Steps>
+  <Step title="Open the HubSpot integration">
+    Navigate to **Settings → Integrations → HubSpot** and click **Connect to HubSpot**.
+  </Step>
+  <Step title="Authorize the integration">
+    Follow the OAuth prompt to grant KD LLC access to your HubSpot account.
+  </Step>
+  <Step title="Configure sync triggers">
+    Choose which KD LLC events — reservation confirmed, cancellation, repeat visit — create or update HubSpot Contact records.
+  </Step>
+  <Step title="Enable Deal Creation (optional)">
+    Toggle **Deal Creation** on to log high-value reservations as HubSpot Deals automatically.
+  </Step>
+  <Step title="Save">
+    Click **Save** to activate the integration.
+  </Step>
+</Steps>
 
 <Tip>
 Use HubSpot's workflow automation to send a win-back email to guests who have not returned to your venue in 60 days, triggered by the last reservation date synced from KD LLC.
@@ -98,17 +133,35 @@ Zapier and Make let you connect KD LLC to thousands of additional apps using pre
 
 ### Zapier
 
-1. Visit [zapier.com](https://zapier.com) and search for **KD LLC** in the app directory.
-2. Browse available Zap templates (for example, *New KD LLC Reservation → Add Row in Google Sheets*).
-3. Click **Use this Zap**, authenticate your KD LLC account using your API key, and follow the setup wizard.
+<Steps>
+  <Step title="Find the KD LLC app">
+    Visit [zapier.com](https://zapier.com) and search for **KD LLC** in the app directory.
+  </Step>
+  <Step title="Choose a template">
+    Browse available Zap templates (for example, *New KD LLC Reservation → Add Row in Google Sheets*) and click **Use this Zap**.
+  </Step>
+  <Step title="Authenticate and configure">
+    Sign in to your KD LLC account using your API key when prompted, then follow the setup wizard to complete your Zap.
+  </Step>
+</Steps>
 
 ### Make (Integromat)
 
-1. Open your Make workspace and create a new Scenario.
-2. Add the **KD LLC** module from the app library.
-3. Connect your account by entering your API key when prompted.
-4. Choose a trigger (for example, **Watch Reservations**) and chain it to any downstream modules your workflow requires.
+<Steps>
+  <Step title="Create a new Scenario">
+    Open your Make workspace and create a new Scenario.
+  </Step>
+  <Step title="Add the KD LLC module">
+    Search for and add the **KD LLC** module from the app library.
+  </Step>
+  <Step title="Connect your account">
+    Enter your API key when prompted to authenticate the connection.
+  </Step>
+  <Step title="Configure your trigger and actions">
+    Choose a trigger (for example, **Watch Reservations**) and chain it to any downstream modules your workflow requires.
+  </Step>
+</Steps>
 
 <Tip>
-If none of the listed integrations meet your needs, use KD LLC's [webhook notifications](/configuration/notifications#webhook-notifications) to build a fully custom integration. Any service that can receive an HTTP POST request — including your own internal APIs — can be connected this way without relying on a third-party automation platform.
+If none of the listed integrations meet your needs, use KD LLC's [webhook notifications](/configuration/notifications#webhook-notifications) to build a fully custom integration. Any service that can receive an HTTP POST request can be connected this way without relying on a third-party automation platform.
 </Tip>

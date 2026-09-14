@@ -1,7 +1,7 @@
 ---
-title: "KD LLC Frequently Asked Questions"
+title: "KD LLC Frequently Asked Questions and Quick Answers"
 sidebarTitle: "FAQ"
-description: "Find quick answers to the most common questions about reservations, venue management, payments, team access, and the KD LLC API."
+description: "Get quick answers to the most common questions about making reservations, managing venues, purchasing event tickets, and using the KD LLC API."
 ---
 
 This page collects the questions our support team hears most often. If you cannot find what you are looking for here, visit the [Troubleshooting guide](/support/troubleshooting) for step-by-step resolutions to common errors, or reach out to the team at [support@kdllc.com](mailto:support@kdllc.com).
@@ -100,10 +100,11 @@ API keys are available to all registered KD LLC accounts. To generate one:
 4. Select the permission scopes your integration requires.
 5. Click **Create Key** and copy the key immediately — it is shown only once.
 
-Include your key in requests using the `Authorization` header:
+Include your key in API requests using the `Authorization` header:
 
-```http
-Authorization: Bearer YOUR_API_KEY
+```bash
+curl https://api.kdllc.com/v1/venues \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 For full API documentation, visit the [API Reference](/api/overview) section.

@@ -1,5 +1,5 @@
 ---
-title: "Reservations: Booking Tables & Spaces on KD LLC"
+title: "Reservations: Booking, Lifecycle & Policies on KD LLC"
 sidebarTitle: "Reservations"
 description: "Understand how reservations work in KD LLC — lifecycle states, object properties, cancellation policies, and handling special guest requests."
 ---
@@ -14,7 +14,7 @@ A reservation is a confirmed booking at a venue for a specific date, time, and p
 
 Every reservation follows a predictable sequence of states. Track the `status` field to understand where a reservation stands at any point.
 
-```
+```text
 pending → confirmed → seated → completed
                     ↘ cancelled
 ```
@@ -67,6 +67,82 @@ Each reservation object carries the following fields:
 }
 ```
 
+## Managing Reservations via API
+
+Use the Reservations API to create, retrieve, update, and cancel reservations on behalf of your guests.
+
+### Create a Reservation
+
+Send a `POST` request to `/reservations` with the guest and booking details.
+
+```bash
+curl -X POST https://api.kdllc.com/v1/reservations \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "venue_id": "venue_abc123",
+    "date": "2025-02-14",
+    "time": "19:30",
+    "party_size": 4,
+    "guest_name": "Jordan Ellis",
+    "guest_email": "jordan.ellis@example.com",
+    "guest_phone": "+12125550192",
+    "notes": "Celebrating an anniversary — please prepare a dessert surprise."
+  }'
+```
+
+```json
+{
+  "id": "res_xyz789",
+  "venue_id": "venue_abc123",
+  "date": "2025-02-14",
+  "time": "19:30",
+  "party_size": 4,
+  "guest_name": "Jordan Ellis",
+  "guest_email": "jordan.ellis@example.com",
+  "guest_phone": "+12125550192",
+  "status": "confirmed",
+  "notes": "Celebrating an anniversary — please prepare a dessert surprise.",
+  "created_at": "2025-01-20T14:22:10Z"
+}
+```
+
+### Retrieve a Reservation
+
+Fetch current details for any reservation by its `id`.
+
+```bash
+curl https://api.kdllc.com/v1/reservations/res_xyz789 \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+### Update a Reservation
+
+Modify a confirmed reservation — such as adjusting the party size or shifting the time — using a `PUT` request. Modifications are subject to availability at the new time or size.
+
+```bash
+curl -X PUT https://api.kdllc.com/v1/reservations/res_xyz789 \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "party_size": 6,
+    "time": "20:00"
+  }'
+```
+
+<Note>
+  The reservation remains in `confirmed` status if the modification succeeds. If the new time or size is unavailable, the original details are preserved and an error is returned.
+</Note>
+
+### Cancel a Reservation
+
+Send a `DELETE` request to cancel a reservation. Cancellations are subject to the venue's cancellation policy.
+
+```bash
+curl -X DELETE https://api.kdllc.com/v1/reservations/res_xyz789 \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
 ## Reservation Policies
 
 Venues on KD LLC set their own policies for cancellations, modifications, and no-shows. Always surface these policies to guests before they complete a booking.
@@ -84,10 +160,7 @@ Each venue defines a cancellation deadline — the latest point at which a guest
 
 ### Modification Rules
 
-Guests can modify a confirmed reservation — such as adjusting the party size or shifting the time — up to the venue's modification cutoff. Modifications are subject to availability at the new time or size.
-
-- Use the reservation update endpoint to submit changes.
-- The reservation remains in `confirmed` status if the modification succeeds; otherwise, the original details are preserved and an error is returned.
+Guests can modify a confirmed reservation up to the venue's modification cutoff. Use the `PUT /reservations/{id}` endpoint to submit changes. If the requested slot is unavailable, the original reservation is preserved and an error is returned.
 
 ### No-Show Handling
 

@@ -1,5 +1,5 @@
 ---
-title: "Events: Ticketed & RSVP Experiences on KD LLC"
+title: "Events: Manage Ticketed & RSVP Experiences on KD LLC"
 sidebarTitle: "Events"
 description: "Learn how events work in KD LLC — from ticketed dinners and DJ nights to private invite-only experiences, guest lists, and event booking flows."
 ---
@@ -28,13 +28,14 @@ Each event object contains the following fields:
 | `venue_id` | string | ID of the hosting venue |
 | `name` | string | Display name of the event |
 | `description` | string | Full description shown to guests |
+| `type` | string | Visibility mode: `public`, `private`, or `ticketed` |
 | `date` | string | Event date in `YYYY-MM-DD` format |
 | `start_time` | string | Event start time in `HH:MM` (24-hour) format |
 | `end_time` | string | Event end time in `HH:MM` (24-hour) format |
 | `capacity` | integer | Maximum number of attendees |
 | `ticket_price` | number | Base ticket price in USD |
 | `ticket_types` | array | List of available ticket tier objects |
-| `status` | string | Current event status (`draft`, `published`, `sold_out`, `cancelled`, `completed`) |
+| `status` | string | Current event status: `draft`, `published`, `sold_out`, `cancelled`, or `completed` |
 
 ### Example Event Object
 
@@ -44,6 +45,7 @@ Each event object contains the following fields:
   "venue_id": "venue_abc123",
   "name": "New Year's Eve Grand Gala",
   "description": "Ring in 2026 with a five-course dinner, open bar, and live DJ set at The Grand Lounge. Tables are limited — book early.",
+  "type": "ticketed",
   "date": "2025-12-31",
   "start_time": "20:00",
   "end_time": "02:00",
@@ -70,6 +72,87 @@ Each event object contains the following fields:
 <Note>
   The `end_time` may fall on the following calendar day (e.g., `02:00` for a midnight event). When displaying event times, always clarify the end date if it differs from `date`.
 </Note>
+
+## Managing Events via API
+
+Use the Events API to list published events and create new events at a venue.
+
+### List Events
+
+Retrieve a list of published events, optionally filtered by venue, date, or type.
+
+```bash
+curl https://api.kdllc.com/v1/events \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
+```
+
+```json
+{
+  "data": [
+    {
+      "id": "evt_nye2025",
+      "venue_id": "venue_abc123",
+      "name": "New Year's Eve Grand Gala",
+      "type": "ticketed",
+      "date": "2025-12-31",
+      "start_time": "20:00",
+      "capacity": 150,
+      "status": "published"
+    }
+  ],
+  "has_more": false
+}
+```
+
+### Create an Event
+
+Send a `POST` request to `/events` to create a new event at a venue.
+
+```bash
+curl -X POST https://api.kdllc.com/v1/events \
+  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "venue_id": "venue_abc123",
+    "name": "New Year'\''s Eve Grand Gala",
+    "description": "Ring in 2026 with a five-course dinner, open bar, and live DJ set.",
+    "type": "ticketed",
+    "date": "2025-12-31",
+    "start_time": "20:00",
+    "end_time": "02:00",
+    "capacity": 150,
+    "ticket_types": [
+      {
+        "name": "General Admission",
+        "price": 175.00,
+        "includes": ["dinner", "open_bar", "party_favors"]
+      },
+      {
+        "name": "VIP Table",
+        "price": 350.00,
+        "includes": ["dinner", "open_bar", "party_favors", "reserved_table", "bottle_service"]
+      }
+    ]
+  }'
+```
+
+```json
+{
+  "id": "evt_nye2025",
+  "venue_id": "venue_abc123",
+  "name": "New Year's Eve Grand Gala",
+  "type": "ticketed",
+  "date": "2025-12-31",
+  "start_time": "20:00",
+  "end_time": "02:00",
+  "capacity": 150,
+  "status": "draft"
+}
+```
+
+<Tip>
+  New events are created in `draft` status. Update the event's `status` to `published` when you're ready for guests to discover and register.
+</Tip>
 
 ## Events vs. Reservations
 
@@ -125,4 +208,4 @@ Each guest list entry includes:
   For ticketed events, the guest list is populated automatically when a ticket purchase is confirmed. For RSVP-based events, guests are added when their RSVP is approved.
 </Note>
 
-Use the guest list endpoint to pull a real-time attendee count, export a check-in sheet, or update check-in status as guests arrive at the door.
+Use the `GET /events/{id}/guests` endpoint to pull a real-time attendee count, export a check-in sheet, or update check-in status as guests arrive at the door.
