@@ -1,50 +1,32 @@
 ---
-title: "Events: Manage Ticketed & RSVP Experiences on KD LLC"
+title: "Events: Ticketed & RSVP Experiences on KD LLC"
 sidebarTitle: "Events"
-description: "Learn how events work in KD LLC — from ticketed dinners and DJ nights to private invite-only experiences, guest lists, and event booking flows."
+description: "Learn how events work in KD LLC: ticketed dinners, DJ nights, private invite-only experiences, guest lists, and event booking flows."
 ---
 
-Events bring special, one-of-a-kind experiences to life on KD LLC. While a standard reservation secures a table, an event is a curated experience — a NYE dinner, a rooftop wine tasting, a themed DJ night — that guests discover, register for, or purchase tickets to. Understanding how events are modeled helps you surface the right experiences to guests and manage everything from ticket inventory to guest lists with confidence.
+Events are curated experiences (a NYE dinner, wine tasting, DJ night) with fixed dates, ticket inventory, and guest lists. Reservations book a table; events book a specific experience.
 
-## What Is an Event?
-
-An event is a special, ticketed or RSVP-based experience hosted at a venue for a fixed date and time. Unlike a standard reservation — which books capacity at a venue for an open dining or lounge session — an event is a distinct, programmed experience with its own name, description, ticket structure, and guest list. Events can be open to the public, invite-only, or ticketed with multiple price tiers.
-
-Examples of events on KD LLC include:
-
-- New Year's Eve multi-course dinners
-- Weekend DJ nights and live music performances
-- Private wine and spirit tastings
-- Exclusive chef's table experiences
-- Corporate buyouts and private celebrations
-
-## Event Properties
-
-Each event object contains the following fields:
+## Event object
 
 | Property | Type | Description |
-|---|---|---|
-| `id` | string | Unique identifier for the event |
-| `venue_id` | string | ID of the hosting venue |
-| `name` | string | Display name of the event |
-| `description` | string | Full description shown to guests |
-| `type` | string | Visibility mode: `public`, `private`, or `ticketed` |
-| `date` | string | Event date in `YYYY-MM-DD` format |
-| `start_time` | string | Event start time in `HH:MM` (24-hour) format |
-| `end_time` | string | Event end time in `HH:MM` (24-hour) format |
-| `capacity` | integer | Maximum number of attendees |
-| `ticket_price` | number | Base ticket price in USD |
-| `ticket_types` | array | List of available ticket tier objects |
-| `status` | string | Current event status: `draft`, `published`, `sold_out`, `cancelled`, or `completed` |
-
-### Example Event Object
+| --- | --- | --- |
+| `id` | string | Unique identifier |
+| `venue_id` | string | Hosting venue |
+| `name` | string | Display name |
+| `description` | string | Guest-facing description |
+| `type` | string | `public`, `private`, or `ticketed` |
+| `date` | string | `YYYY-MM-DD` |
+| `start_time` / `end_time` | string | `HH:MM` (24-hour) |
+| `capacity` | integer | Maximum attendees |
+| `ticket_price` | number | Base price in USD |
+| `ticket_types` | array | Available ticket tiers |
+| `status` | string | `draft`, `published`, `sold_out`, `cancelled`, `completed` |
 
 ```json
 {
   "id": "evt_nye2025",
   "venue_id": "venue_abc123",
   "name": "New Year's Eve Grand Gala",
-  "description": "Ring in 2026 with a five-course dinner, open bar, and live DJ set at The Grand Lounge. Tables are limited — book early.",
   "type": "ticketed",
   "date": "2025-12-31",
   "start_time": "20:00",
@@ -62,7 +44,7 @@ Each event object contains the following fields:
       "id": "tt_vip",
       "name": "VIP Table",
       "price": 350.00,
-      "includes": ["dinner", "open_bar", "party_favors", "reserved_table", "bottle_service"]
+      "includes": ["dinner", "open_bar", "reserved_table", "bottle_service"]
     }
   ],
   "status": "published"
@@ -70,142 +52,62 @@ Each event object contains the following fields:
 ```
 
 <Note>
-  The `end_time` may fall on the following calendar day (e.g., `02:00` for a midnight event). When displaying event times, always clarify the end date if it differs from `date`.
+  `end_time` can fall on the next calendar day (e.g., `02:00` for a midnight event).
 </Note>
 
-## Managing Events via API
-
-Use the Events API to list published events and create new events at a venue.
-
-### List Events
-
-Retrieve a list of published events, optionally filtered by venue, date, or type.
+## API
 
 ```bash
+# List
 curl https://api.kdllc.com/v1/events \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
-```
+  -H "Authorization: Bearer YOUR_API_KEY"
 
-```json
-{
-  "data": [
-    {
-      "id": "evt_nye2025",
-      "venue_id": "venue_abc123",
-      "name": "New Year's Eve Grand Gala",
-      "type": "ticketed",
-      "date": "2025-12-31",
-      "start_time": "20:00",
-      "capacity": 150,
-      "status": "published"
-    }
-  ],
-  "has_more": false
-}
-```
-
-### Create an Event
-
-Send a `POST` request to `/events` to create a new event at a venue.
-
-```bash
+# Create (returns draft status)
 curl -X POST https://api.kdllc.com/v1/events \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "venue_id": "venue_abc123",
-    "name": "New Year'\''s Eve Grand Gala",
-    "description": "Ring in 2026 with a five-course dinner, open bar, and live DJ set.",
+    "name": "New Year Gala",
     "type": "ticketed",
     "date": "2025-12-31",
     "start_time": "20:00",
     "end_time": "02:00",
     "capacity": 150,
     "ticket_types": [
-      {
-        "name": "General Admission",
-        "price": 175.00,
-        "includes": ["dinner", "open_bar", "party_favors"]
-      },
-      {
-        "name": "VIP Table",
-        "price": 350.00,
-        "includes": ["dinner", "open_bar", "party_favors", "reserved_table", "bottle_service"]
-      }
+      {"name": "General", "price": 175.00, "includes": ["dinner", "open_bar"]},
+      {"name": "VIP", "price": 350.00, "includes": ["dinner", "open_bar", "reserved_table"]}
     ]
   }'
 ```
 
-```json
-{
-  "id": "evt_nye2025",
-  "venue_id": "venue_abc123",
-  "name": "New Year's Eve Grand Gala",
-  "type": "ticketed",
-  "date": "2025-12-31",
-  "start_time": "20:00",
-  "end_time": "02:00",
-  "capacity": 150,
-  "status": "draft"
-}
-```
-
 <Tip>
-  New events are created in `draft` status. Update the event's `status` to `published` when you're ready for guests to discover and register.
+  New events start as `draft`. Update `status` to `published` when ready for guests.
 </Tip>
 
-## Events vs. Reservations
+## Events vs. reservations
 
-Events and reservations share a venue and a guest, but they serve different purposes and follow different booking flows.
+|  | Reservation | Event |
+| --- | --- | --- |
+| **Purpose** | Book a table | Book a specific experience |
+| **Pricing** | Usually free | Often ticketed |
+| **Flexibility** | Guest picks a time | Date and time fixed |
+| **Capacity** | Per time slot | Per event |
+| **Guest list** | Not applicable | Managed on the event |
+| **Modification** | Time and size changeable | Limited; ticket transfers may apply |
 
-| | Reservation | Event |
-|---|---|---|
-| **Purpose** | Book a table or space at a venue | Register for or purchase a specific experience |
-| **Pricing** | Typically free to book | Often ticketed with a purchase required |
-| **Flexibility** | Guest chooses time within availability | Date and time are fixed by the venue |
-| **Capacity tracking** | Per time slot | Per event |
-| **Guest list** | Not applicable | Managed via event guest list |
-| **Modification** | Time/size can be changed | Ticket transfers may apply; modifications limited |
+## Event types
 
-Use a reservation when your guest wants an open dining or lounge experience at a venue. Use an event booking when your guest is purchasing a spot in a specific, programmed experience.
-
-<Tip>
-  Display both upcoming events and standard availability on your venue detail pages. Guests often decide between a regular visit and a special event when browsing a venue.
-</Tip>
-
-## Event Types
-
-KD LLC supports three event visibility modes that control who can discover and register for an event.
-
-### Public Events
-
-Public events are open to all guests and appear in KD LLC search results and venue listings. Any guest can purchase a ticket or RSVP — no invitation required. Use public events for DJ nights, ticketed dinners, and any experience you want to promote broadly.
-
-### Private Events
-
-Private events are invite-only and do not appear in public search results. Guests can only access a private event through a direct link or by being added to the guest list by the host. Use private events for corporate buyouts, milestone celebrations, and members-only experiences.
+- **Public** — Open to all guests, appears in search
+- **Private** — Invite-only, accessed via direct link or guest list
+- **Ticketed** — Requires purchase; guests added to guest list automatically
 
 <Warning>
-  Private event links are shareable. If you need to restrict attendance strictly, use the guest list feature and disable open registration on the event.
+  Private event links are shareable. To strictly restrict attendance, use the guest list and disable open registration.
 </Warning>
 
-### Ticketed Events
+## Guest lists
 
-Ticketed events require guests to purchase one or more tickets to secure their spot. Tickets may come in multiple tiers (see `ticket_types` above), each with its own price, inclusions, and availability. Once a ticket is purchased, the guest receives a confirmation and is added to the event's guest list automatically.
+Every event has a guest list: the source of truth for check-in and capacity. Each entry includes name and contact, ticket type, check-in status, and party size.
 
-## Guest Lists
-
-Every event on KD LLC maintains a guest list — a real-time record of confirmed attendees. The guest list is the source of truth for event check-in and capacity tracking.
-
-Each guest list entry includes:
-
-- **Guest name and contact info** — carried over from the ticket purchase or RSVP
-- **Ticket type** — the tier the guest purchased
-- **Check-in status** — whether the guest has been marked as arrived at the venue
-- **Party size** — for guests booking on behalf of a group
-
-<Note>
-  For ticketed events, the guest list is populated automatically when a ticket purchase is confirmed. For RSVP-based events, guests are added when their RSVP is approved.
-</Note>
-
-Use the `GET /events/{id}/guests` endpoint to pull a real-time attendee count, export a check-in sheet, or update check-in status as guests arrive at the door.
+Guests are added automatically on ticket purchase (ticketed) or RSVP approval (RSVP-based). Use `GET /events/{id}/guests` for a live attendee count, check-in sheet, or check-in updates.

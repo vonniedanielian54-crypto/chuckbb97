@@ -1,18 +1,12 @@
 ---
 title: "Reservations: Booking, Lifecycle & Policies on KD LLC"
 sidebarTitle: "Reservations"
-description: "Understand how reservations work in KD LLC — lifecycle states, object properties, cancellation policies, and handling special guest requests."
+description: "Understand KD LLC reservations: lifecycle states, object properties, cancellation policies, and special guest requests."
 ---
 
-Reservations are how guests secure their spot at a venue on KD LLC. When a guest books a table at a restaurant, claims a section at a lounge, or reserves a private dining room, a reservation is created and tied to both the venue and the guest's contact information. Understanding the reservation model — from creation through completion — helps you build reliable booking experiences and handle every edge case confidently.
+Reservations secure a guest's spot at a venue. Track the `status` field to know where each booking stands.
 
-## What Is a Reservation?
-
-A reservation is a confirmed booking at a venue for a specific date, time, and party size. It links a guest's identity and contact details to a venue's available inventory for a particular moment in time. Once created, a reservation moves through a defined lifecycle that reflects its real-world status — from the moment a guest books to the moment they leave the venue.
-
-## Reservation Lifecycle
-
-Every reservation follows a predictable sequence of states. Track the `status` field to understand where a reservation stands at any point.
+## Lifecycle
 
 ```text
 pending → confirmed → seated → completed
@@ -21,35 +15,31 @@ pending → confirmed → seated → completed
 
 | Status | Description |
 |---|---|
-| `pending` | Reservation has been submitted but not yet confirmed by the venue |
-| `confirmed` | Venue has accepted the booking; the guest has a guaranteed spot |
-| `seated` | Guest has arrived and been seated at the venue |
-| `completed` | Visit is over; reservation is closed |
-| `cancelled` | Reservation was cancelled by the guest or the venue |
+| `pending` | Submitted, awaiting venue confirmation |
+| `confirmed` | Venue accepted; guest has a guaranteed spot |
+| `seated` | Guest has arrived and been seated |
+| `completed` | Visit is over |
+| `cancelled` | Cancelled by guest or venue |
 
 <Note>
-  Most reservations move from `pending` to `confirmed` automatically within seconds. Some venues require manual review, which may introduce a short delay.
+  Most reservations move from `pending` to `confirmed` in seconds. Some venues require manual review.
 </Note>
 
-## Reservation Properties
-
-Each reservation object carries the following fields:
+## Reservation object
 
 | Property | Type | Description |
 |---|---|---|
-| `id` | string | Unique identifier for the reservation |
-| `venue_id` | string | ID of the venue being reserved |
-| `date` | string | Reservation date in `YYYY-MM-DD` format |
-| `time` | string | Reservation time in `HH:MM` (24-hour) format |
-| `party_size` | integer | Number of guests in the party |
-| `guest_name` | string | Full name of the primary guest |
-| `guest_email` | string | Email address for confirmation and updates |
-| `guest_phone` | string | Phone number for venue contact |
-| `status` | string | Current lifecycle state of the reservation |
-| `notes` | string | Special requests or notes from the guest |
-| `created_at` | string | ISO 8601 timestamp of when the reservation was created |
-
-### Example Reservation Object
+| `id` | string | Unique identifier |
+| `venue_id` | string | Reserved venue |
+| `date` | string | `YYYY-MM-DD` |
+| `time` | string | `HH:MM` (24-hour) |
+| `party_size` | integer | Number of guests |
+| `guest_name` | string | Primary guest's full name |
+| `guest_email` | string | Confirmation email |
+| `guest_phone` | string | Contact number |
+| `status` | string | Current lifecycle state |
+| `notes` | string | Special requests (500 char max) |
+| `created_at` | string | ISO 8601 timestamp |
 
 ```json
 {
@@ -62,125 +52,70 @@ Each reservation object carries the following fields:
   "guest_email": "jordan.ellis@example.com",
   "guest_phone": "+12125550192",
   "status": "confirmed",
-  "notes": "Celebrating an anniversary — please prepare a dessert surprise.",
+  "notes": "Anniversary, please prepare a dessert surprise.",
   "created_at": "2025-01-20T14:22:10Z"
 }
 ```
 
-## Managing Reservations via API
-
-Use the Reservations API to create, retrieve, update, and cancel reservations on behalf of your guests.
-
-### Create a Reservation
-
-Send a `POST` request to `/reservations` with the guest and booking details.
+## API
 
 ```bash
+# Create
 curl -X POST https://api.kdllc.com/v1/reservations \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{
-    "venue_id": "venue_abc123",
-    "date": "2025-02-14",
-    "time": "19:30",
-    "party_size": 4,
-    "guest_name": "Jordan Ellis",
-    "guest_email": "jordan.ellis@example.com",
-    "guest_phone": "+12125550192",
-    "notes": "Celebrating an anniversary — please prepare a dessert surprise."
-  }'
-```
+  -d '{"venue_id":"venue_abc123","date":"2025-02-14","time":"19:30","party_size":4,"guest_name":"Jordan Ellis","guest_email":"jordan.ellis@example.com","guest_phone":"+12125550192"}'
 
-```json
-{
-  "id": "res_xyz789",
-  "venue_id": "venue_abc123",
-  "date": "2025-02-14",
-  "time": "19:30",
-  "party_size": 4,
-  "guest_name": "Jordan Ellis",
-  "guest_email": "jordan.ellis@example.com",
-  "guest_phone": "+12125550192",
-  "status": "confirmed",
-  "notes": "Celebrating an anniversary — please prepare a dessert surprise.",
-  "created_at": "2025-01-20T14:22:10Z"
-}
-```
-
-### Retrieve a Reservation
-
-Fetch current details for any reservation by its `id`.
-
-```bash
+# Retrieve
 curl https://api.kdllc.com/v1/reservations/res_xyz789 \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
-```
+  -H "Authorization: Bearer YOUR_API_KEY"
 
-### Update a Reservation
-
-Modify a confirmed reservation — such as adjusting the party size or shifting the time — using a `PUT` request. Modifications are subject to availability at the new time or size.
-
-```bash
+# Update
 curl -X PUT https://api.kdllc.com/v1/reservations/res_xyz789 \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{
-    "party_size": 6,
-    "time": "20:00"
-  }'
+  -d '{"party_size":6,"time":"20:00"}'
+
+# Cancel
+curl -X DELETE https://api.kdllc.com/v1/reservations/res_xyz789 \
+  -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 <Note>
-  The reservation remains in `confirmed` status if the modification succeeds. If the new time or size is unavailable, the original details are preserved and an error is returned.
+  If a requested modification slot is unavailable, the original reservation is preserved and an error is returned.
 </Note>
 
-### Cancel a Reservation
+## Policies
 
-Send a `DELETE` request to cancel a reservation. Cancellations are subject to the venue's cancellation policy.
+### Cancellation
 
-```bash
-curl -X DELETE https://api.kdllc.com/v1/reservations/res_xyz789 \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx"
-```
-
-## Reservation Policies
-
-Venues on KD LLC set their own policies for cancellations, modifications, and no-shows. Always surface these policies to guests before they complete a booking.
-
-### Cancellation Window
-
-Each venue defines a cancellation deadline — the latest point at which a guest can cancel without penalty. Cancellations made after this window may result in a fee charged to the guest's payment method on file.
-
-- Retrieve a venue's cancellation policy from the `policies.cancellation` field on the venue object.
-- Display the deadline prominently in your booking confirmation UI.
+Each venue sets a cancellation deadline (see `policies.cancellation` on the venue). Cancellations after the deadline may incur a fee.
 
 <Warning>
-  Cancellations submitted after the venue's deadline are non-refundable. Always confirm the cancellation window with the guest before processing.
+  Cancellations submitted after the venue's deadline are non-refundable.
 </Warning>
 
-### Modification Rules
+### Modifications
 
-Guests can modify a confirmed reservation up to the venue's modification cutoff. Use the `PUT /reservations/{id}` endpoint to submit changes. If the requested slot is unavailable, the original reservation is preserved and an error is returned.
+Guests can modify a confirmed reservation up to the venue's modification cutoff via `PUT /reservations/{id}`.
 
-### No-Show Handling
+### No-shows
 
-If a guest does not arrive within the venue's no-show window (typically 15–30 minutes after the reservation time), the venue may mark the reservation as a no-show. No-show policies vary by venue and may include a fee.
+If a guest doesn't arrive within the venue's no-show window (typically 15 to 30 minutes late), the venue may mark the booking as a no-show and charge a fee.
 
 <Tip>
-  Send guests an automated reminder 24 hours before their reservation to reduce no-show rates. Include a one-click cancellation link to keep your cancellation rate accurate.
+  Send an automated reminder 24 hours before the reservation with a one-click cancellation link to reduce no-shows.
 </Tip>
 
-## Special Requests and Notes
+## Special requests
 
-The `notes` field lets guests communicate preferences, dietary restrictions, accessibility needs, or celebration details directly to the venue. This is a free-text field with a 500-character limit.
+Use the `notes` field for preferences, allergies, accessibility needs, or celebrations. Common examples:
 
-Common use cases for notes include:
-
-- Dietary restrictions (e.g., `"Guest has a severe nut allergy"`)
-- Celebration requests (e.g., `"Birthday — please have candles on the dessert"`)
-- Seating preferences (e.g., `"Prefer a booth or window table"`)
-- Accessibility needs (e.g., `"Wheelchair-accessible seating required"`)
+- `"Guest has a severe nut allergy"`
+- `"Birthday, please have candles on the dessert"`
+- `"Prefer a booth or window table"`
+- `"Wheelchair-accessible seating required"`
 
 <Note>
-  Notes are passed directly to venue staff and are not guaranteed to be fulfilled. Encourage guests to contact the venue directly for critical requirements.
+  Notes are passed to venue staff but not guaranteed. For critical requirements, guests should contact the venue directly.
 </Note>

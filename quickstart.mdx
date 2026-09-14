@@ -1,136 +1,50 @@
 ---
-title: "KD LLC API Quickstart: From Sign-Up to Reservation"
+title: "KD LLC Quickstart: Your First Reservation via API"
 sidebarTitle: "Quickstart"
-description: "Create your KD LLC account, generate an API key, and complete your first venue search and reservation via live API calls in minutes."
+description: "Sign up, generate an API key, and book your first reservation with the KD LLC API in under five minutes."
 ---
 
-This guide walks you through everything you need to start using the KD LLC API. By the end, you'll have an authenticated API key, a list of available venues, and a confirmed reservation — all using real API calls you can run right now.
-
-## Prerequisites
-
-Before you begin, make sure you have the following:
-
-- A **KD LLC account** — sign up for free at [app.kdllc.com](https://app.kdllc.com).
-- An **API key** — generated from your account settings (see Step 2 below).
-- A terminal or HTTP client such as `curl`, Postman, or Insomnia.
-
----
+Get from sign-up to a confirmed reservation in four steps.
 
 <Steps>
   <Step title="Create your account">
-    Visit [app.kdllc.com](https://app.kdllc.com) and click **Sign Up**. Fill in your name, email address, and a secure password, then verify your email address using the confirmation link KD LLC sends you.
-
-    Once verified, you'll land on your KD LLC dashboard and your account will be active on the Free tier.
+    Sign up at [app.kdllc.com](https://app.kdllc.com) and verify your email.
   </Step>
 
   <Step title="Generate an API key">
-    From your dashboard, navigate to **Settings → API Keys** and click **Create New Key**. Give your key a descriptive label (for example, `development` or `production`) and click **Generate**.
-
-    Your new API key will be displayed once — copy it and store it somewhere safe immediately.
+    Go to **Settings → API Keys → Create New Key**. Copy the key immediately, it's shown only once.
 
     <Warning>
-      Your API key is shown only once at creation. If you lose it, you must revoke the key and generate a new one. Never commit API keys to version control or share them publicly.
+      Never commit keys to version control. Use `kdllc_sk_test_` keys during development.
     </Warning>
-
-    A live KD LLC API key looks like this:
-
-    ```
-    kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx
-    ```
-
-    Use test keys (prefixed `kdllc_sk_test_`) during development so you don't affect live data.
   </Step>
 
-  <Step title="List available venues">
-    With your API key in hand, make your first authenticated request to retrieve a list of venues available on the platform.
-
-```bash
-curl -X GET "https://api.kdllc.com/v1/venues" \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
-  -H "Content-Type: application/json"
-```
-
-    A successful response returns an array of venue objects:
-
-```json
-{
-  "data": [
-    {
-      "id": "venue_01HXYZ1234ABCD",
-      "name": "The Grand Terrace",
-      "type": "restaurant",
-      "capacity": 120,
-      "cuisine": "Contemporary American",
-      "city": "New York",
-      "available": true
-    },
-    {
-      "id": "venue_01HXYZ5678EFGH",
-      "name": "Noir Lounge",
-      "type": "nightclub",
-      "capacity": 300,
-      "cuisine": null,
-      "city": "New York",
-      "available": true
-    }
-  ],
-  "meta": {
-    "total": 2,
-    "page": 1,
-    "per_page": 20
-  }
-}
-```
-
-    <Tip>
-      Use query parameters like `?city=New+York&type=restaurant` to filter venues by location and type.
-    </Tip>
+  <Step title="List venues">
+    ```bash
+    curl https://api.kdllc.com/v1/venues \
+      -H "Authorization: Bearer YOUR_API_KEY"
+    ```
   </Step>
 
-  <Step title="Make a reservation">
-    Use the `venue_id` from the previous response to book a reservation. Send a `POST` request to `/reservations` with the party details in the request body.
+  <Step title="Book a reservation">
+    ```bash
+    curl -X POST https://api.kdllc.com/v1/reservations \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "venue_id": "venue_01HXYZ1234ABCD",
+        "date": "2025-09-15",
+        "time": "19:30",
+        "party_size": 4,
+        "guest_name": "Jane Smith",
+        "guest_email": "jane.smith@example.com"
+      }'
+    ```
 
-```bash
-curl -X POST "https://api.kdllc.com/v1/reservations" \
-  -H "Authorization: Bearer kdllc_sk_live_xxxxxxxxxxxxxxxxxxxx" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "venue_id": "venue_01HXYZ1234ABCD",
-    "date": "2025-09-15",
-    "time": "19:30",
-    "party_size": 4,
-    "guest_name": "Jane Smith",
-    "guest_email": "jane.smith@example.com",
-    "notes": "Window table preferred"
-  }'
-```
-
-    A successful reservation returns a confirmation object with your booking ID:
-
-```json
-{
-  "data": {
-    "id": "res_01HXYZ9999WXYZ",
-    "status": "confirmed",
-    "venue_id": "venue_01HXYZ1234ABCD",
-    "venue_name": "The Grand Terrace",
-    "date": "2025-09-15",
-    "time": "19:30",
-    "party_size": 4,
-    "guest_name": "Jane Smith",
-    "guest_email": "jane.smith@example.com",
-    "confirmation_code": "KD-748291",
-    "created_at": "2025-08-01T14:23:00Z"
-  }
-}
-```
-
-    KD LLC will automatically send a confirmation email to the guest's email address with the reservation details and confirmation code.
+    KD LLC sends a confirmation email to the guest automatically.
   </Step>
 </Steps>
 
----
-
 <Note>
-  You've just made your first KD LLC reservation via the API. To explore all available endpoints — including event management, guest lists, and notifications — visit the [API Reference](/api/overview).
+  Explore all endpoints in the [API Reference](/api/overview).
 </Note>
